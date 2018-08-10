@@ -22,6 +22,10 @@ public:
   // general parameters
   double verbosity = 0;
   double RT_by_nF;
+  double V;
+  double Ca;
+  double i_Ca;
+  double I_ext;
 
   // spatial variables
   container* upstream;
@@ -40,10 +44,6 @@ public:
 
   // housekeeping variables
   int n_axial_syn;
-  double V;
-  double Ca;
-  double i_Ca;
-  double I_ext;
   double V_prev;
   double Ca_prev;
   double i_Ca_prev;
