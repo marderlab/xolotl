@@ -11,6 +11,7 @@
 #include "conductance.hpp"
 #include "synapse.hpp"
 #include "mechanism.hpp"
+#include "AbstractCompartment.hpp"
 class network;
 
 #define F 96485
@@ -18,7 +19,7 @@ class network;
 
 using namespace std;
 
-class compartment
+class compartment: public AbstractCompartment
 {
 protected:
 
@@ -45,24 +46,24 @@ public:
     double c_;
     double f_;
     double delta_V;
-    double i_Ca_prev = 0;
-    double Ca_prev;
-    double V_prev;
+    // double i_Ca_prev = 0;
+    // double Ca_prev;
+    // double V_prev;
 
-    double verbosity = 0;
+    // double verbosity = 0;
 
-    double RT_by_nF;
+    // double RT_by_nF;
 
     // this int stores an integer that indicates
     // the hierarchy of this compartment in a multi-comp
     // neuron tree. tree_idx of 0 means it is a soma
     // compartment
-    double tree_idx;
+    // double tree_idx;
 
     // this number stores a numeric value
     // that corresponds to the neuron # of this compartment
     // in the whole network. automatically assigned
-    double neuron_idx;
+    // double neuron_idx;
 
     // pointers to upstream and downstream compartments
     // (will be generated on initialization)
@@ -103,16 +104,16 @@ public:
     // pulling out the full trace
     double Ca_average;
 
-    double V = -60;
-    double Ca;
-    double E_Ca;
-    double i_Ca; // specific calcium current (current/area. nA/mm^2)
-    double I_ext; // all external currents are summed here
-    double I_clamp; // this is the current required to clamp it
-    int n_cond; // this keep tracks of the # channels
-    int n_cont; // # of mechanisms
-    int n_syn; // # of synapses
-    int n_axial_syn;
+    // double V = -60;
+    // double Ca;
+    // double E_Ca;
+    // double i_Ca; // specific calcium current (current/area. nA/mm^2)
+    // double I_ext; // all external currents are summed here
+    // double I_clamp; // this is the current required to clamp it
+    // int n_cond; // this keep tracks of the # channels
+    // int n_cont; // # of mechanisms
+    // int n_syn; // # of synapses
+    // int n_axial_syn;
 
     // constructor with all parameters
     compartment(double V_, double Ca_, double Cm_, double A_, double vol_,  double Ca_target_, double Ca_average_, double tree_idx_, double neuron_idx_, double radius_, double len_, double shell_thickness_, double Ca_out_)
@@ -175,7 +176,7 @@ public:
 
 
         // housekeeping
-        E_Ca = 0; // because this will be computed from the Nernst eq. 
+        E_Ca = 0; // because this will be computed from the Nernst eq.
         i_Ca = 0; // this is the current density (nA/mm^2)
         n_cond = 0;
         n_cont = 0;
@@ -225,7 +226,7 @@ public:
     mechanism* getMechanismPointer(const char*); // overloaded
     compartment* getConnectedCompartment(int);
     conductance* getConductancePointer(const char*);
-    
+
 
 
 };
@@ -294,9 +295,9 @@ conductance* compartment::getConductancePointer(const char* cond_class)
 
 mechanism * compartment::getMechanismPointer(int cont_idx)
 {
-    if (cont_idx < n_cont) { return cont[cont_idx];} 
+    if (cont_idx < n_cont) { return cont[cont_idx];}
     else { return NULL; }
-    
+
 }
 
 mechanism* compartment::getMechanismPointer(const char* cond_class)
@@ -327,7 +328,7 @@ compartment* compartment::getConnectedCompartment(int idx)
     return neighbour;
 }
 
-// returns the size of data frame for all synapses 
+// returns the size of data frame for all synapses
 // in this compartment
 // includes synaptic currents interleaved
 // with state variables of each synapse
@@ -460,13 +461,13 @@ void compartment::integrateVoltage(double dt, double delta_temperature)
         V_inf = (sigma_gE + (I_ext/A))/sigma_g;
     }
 
-    // integrate V 
+    // integrate V
     V = V_inf + (V_prev - V_inf)*exp(-dt/(Cm/(sigma_g)));
 
 }
 
 
-// assumes the cell is being clamped, and 
+// assumes the cell is being clamped, and
 // integrates and solves for I_clamp
 
 void compartment::integrateV_clamp(double V_clamp, double dt, double delta_temperature)

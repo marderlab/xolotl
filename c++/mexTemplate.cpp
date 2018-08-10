@@ -13,7 +13,7 @@
 
 using namespace std;
 
-// declare global variable 
+// declare global variable
 // so that other code can access verbosity
 // double verbosity;
 
@@ -53,13 +53,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     //xolotl:add_conductances_here
 
 
-    vector<synapse*> synapses; // pointers to all synapses 
+    vector<synapse*> synapses; // pointers to all synapses
     //xolotl:add_synapses_here
 
 
     //xolotl:add_mechanisms_here
 
-    
+
 
     //xolotl:call_methods_here
     int nsteps = (int) floor(t_end/sim_dt);
@@ -80,10 +80,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         full_controller_sizes[i] = xolotl_network.comp[i]->getFullMechanismSize();
         full_controller_size += full_controller_sizes[i];
     }
-    
+
 
     // compute ionic current state dimensions
-    // assumed to be the same for all conductances 
+    // assumed to be the same for all conductances
     int full_current_size = 0;
     for (int i = 0; i < n_comp; i ++)
     {
@@ -108,7 +108,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexPrintf("[C++] res = %i\n",res);
         mexPrintf("[C++] nsteps = %i\n",nsteps);
     }
-    
+
     plhs[0] = mxCreateDoubleMatrix(param_size, 1, mxREAL);
     output_state = mxGetPr(plhs[0]);
 
@@ -143,7 +143,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double * V_clamp_in = mxGetPr(prhs[2]);
 
 
-    // figure out the sizes of the arrays 
+    // figure out the sizes of the arrays
     // for V_clamp and I_ext
     const mwSize *I_ext_dim, *V_clamp_dim;
     I_ext_dim = mxGetDimensions(prhs[1]);
@@ -336,7 +336,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     {
                         syn_idx = (synapses[k]->getFullState(output_syn_state,syn_idx));
                     }
-                    
+
                 }
 
 
