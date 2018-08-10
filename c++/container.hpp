@@ -7,9 +7,9 @@
 #define CONTAINER
 #include <cmath>
 #include <vector>
-#include "conductance.hpp"
-#include "synapse.hpp"
-#include "mechanism.hpp"
+// #include "conductance.hpp"
+// #include "synapse.hpp"
+// #include "mechanism.hpp"
 
 using namespace std;
 
