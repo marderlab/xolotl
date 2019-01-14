@@ -5,14 +5,25 @@
    >  < (_) | | (_) | |_| |
   /_/\_\___/|_|\___/ \__|_|
 
-setup
-^^^^^
-A static method that allows you to set up compilers on some operating systems. You need to run this only once. If xolotl works, there is no need to run this. 
+### setup
 
-Usage ::
+**Syntax**
 
-   xolotl.setup
-   x.setup
+```matlab
+xolotl.setup
+x.setup
+```
+
+**Description**
+
+A static method that allows you to set up compilers 
+on some operating systems. You need to run this only 
+once. If xolotl works, there is no need to run this. 
+
+
+!!! info "See Also"
+    ->xolotl.update
+    ->xolotl.uninstall
 
 %}
 

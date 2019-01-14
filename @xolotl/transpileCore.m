@@ -1,12 +1,32 @@
-%              _       _   _
-%   __  _____ | | ___ | |_| |
-%   \ \/ / _ \| |/ _ \| __| |
-%    >  < (_) | | (_) | |_| |
-%   /_/\_\___/|_|\___/ \__|_|
-%
-% MATLAB -> C++ transpiler
-% creates a C++ file that can be compiled with mex
+%{   
+             _       _   _ 
+  __  _____ | | ___ | |_| |
+  \ \/ / _ \| |/ _ \| __| |
+   >  < (_) | | (_) | |_| |
+  /_/\_\___/|_|\___/ \__|_|
 
+### transpileCore
+
+**Syntax**
+
+```matlab
+x.transpileCore(in_file,out_file)
+```
+
+**Description**
+
+method that writes C++ bridge code to set up
+and integrate your model based on the 
+objects configured in the xolotl tree. This is 
+internally called by xolotl.transpile()
+
+Do not call this method. It is not meant 
+to be user accessible. 
+
+!!! info "See Also"
+    ->xolotl.transpile
+
+%}
 
 function transpileCore(self,in_file,out_file)
 
@@ -26,7 +46,9 @@ header_files{3} = joinPath(self.cpp_folder,'synapse.hpp');
 header_files{4} = joinPath(self.cpp_folder,'conductance.hpp');
 header_files{5} = joinPath(self.cpp_folder,'mechanism.hpp');
 temp = self.generateHeaders; temp = temp(:);
-header_files = [header_files(:); unique(temp(2:end))];
+temp(cellfun(@isempty,temp)) = [];
+header_files = [header_files(:); unique(temp(:))];
+
 
 for i = 1:length(header_files)
 	header_files{i} = strcat('#include "',header_files{i}, '"'); 
@@ -56,6 +78,7 @@ lines = [lines(1:insert_here); input_hookups(:); lines(insert_here+1:end)];
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % make all the C++ objects 
 [constructors, class_parents, obj_names] = self.generateConstructors;
+
 
 insert_here = lineFind(lines,'//xolotl:insert_constructors');
 assert(length(insert_here)==1,'Could not find insertion point for object constructors')
@@ -125,9 +148,11 @@ lines = [lines(1:insert_here); channel_hookups(:); lines(insert_here+1:end)];
 
 
 synapse_add_lines = {};
-for i = 1:length(self.synapses)
-	synapse_add_lines{i} = ['synapses' mat2str(i) '.connect(&' self.synapse_pre{i} ', &' self.synapse_post{i} '); n_synapses ++; synapses.push_back(&synapses' mat2str(i) ');'];
+for i = length(self.synapses):-1:1
+	syn_name = strrep(self.synapses(i).syn_name,'.','_');
+	synapse_add_lines{i} = [syn_name '.connect(&' self.synapses(i).pre_synapse ', &' self.synapses(i).post_synapse '); n_synapses ++; all_synapses.push_back(&' syn_name ');'];
 end
+
 
 insert_here = lineFind(lines,'//xolotl:add_synapses_here');
 assert(length(insert_here)==1,'Could not find insertion point for synapse->cell hookups')

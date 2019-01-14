@@ -1,4 +1,4 @@
-// Cholingeric Synapse 
+// Cholingeric Synapse
 #ifndef CHOLINERGIC
 #define CHOLINERGIC
 #include "synapse.hpp"
@@ -7,29 +7,27 @@ class Cholinergic: public synapse {
 
 public:
 
-    double Delta;
-    double k_;
-    double Vth;
+    double Delta = 5.0;
+    double k_ = 0.01;
+    double Vth = -35.0;
 
 
-    // specify parameters + initial conditions 
+    // specify parameters + initial conditions
     Cholinergic(double g_, double s_)
     {
-        gbar = g_;
+        gmax = g_;
         E = -80.0;
-        Delta = 5.0;
-        Vth = -35.0;
-        k_ = 0.01;
+
 
         // dynamic variables
         s = s_;
 
         // defaults
         if (isnan (s)) { s = 0; }
-        if (isnan (gbar)) { gbar = 0; }
+        if (isnan (gmax)) { gmax = 0; }
         is_electrical = false;
     }
-    
+
     void integrate(void);
     void integrateMS(int, double, double);
     void checkSolvers(int);
@@ -46,7 +44,7 @@ public:
 
 int Cholinergic::getFullStateSize()
 {
-    return 2; 
+    return 2;
 }
 
 
@@ -67,14 +65,17 @@ double Cholinergic::sdot(double V_pre, double s_)
 }
 
 void Cholinergic::integrate(void)
-{   
+{
     // figure out the voltage of the pre-synaptic neuron
     double V_pre = pre_syn->V;
     double sinf = s_inf(V_pre);
 
     // integrate using exponential Euler
     s = sinf + (s - sinf)*exp(-dt/tau_s(sinf));
-    
+
+    g = gmax*s;
+
+
 }
 
 void Cholinergic::integrateMS(int k, double V, double Ca)
@@ -87,7 +88,7 @@ void Cholinergic::integrateMS(int k, double V, double Ca)
     if (k == 0) {
         V_pre = pre_syn->V_prev;
         k_s[0] = dt*(sdot(V_pre, s));
-        
+
     } else if (k == 1) {
 
         V_pre = pre_syn->V_prev + pre_syn->k_V[0]/2;
@@ -132,15 +133,15 @@ int Cholinergic::getFullState(double *syn_state, int idx)
     idx++;
 
     // also return the current from this synapse
-    syn_state[idx] = gbar*s*(post_syn->V - E);
+    syn_state[idx] = gmax*s*(post_syn->V - E);
     idx++;
     return idx;
 }
 
-void Cholinergic::connect(compartment *pcomp1_, compartment *pcomp2_) 
+void Cholinergic::connect(compartment *pcomp1_, compartment *pcomp2_)
 {
-    pre_syn = pcomp1_; 
-    post_syn = pcomp2_; 
+    pre_syn = pcomp1_;
+    post_syn = pcomp2_;
 
     // tell the post-synaptic cell that we're connecting to it
     post_syn->addSynapse(this);

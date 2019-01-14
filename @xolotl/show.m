@@ -5,32 +5,25 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-show
-^^^^^
+### show
 
-shows activation functions and timescales of any conductance. Usage ::
+**Syntax**
 
-   x.show('cond_name')
+```matlab
+xolotl.show('path/to/conductance/file')
+```
 
-'cond_name' must be a string that resolves to a valid C++ file that describes a conductance. 
+This method displays activation functions and timescales of any conductance. Subsequent calls to `show` will update the plot, plotting the new activation curves over the old ones, allowing you to compare different channels. 
 
-Example
--------
 
-:: 
+This method also supports tab-completion. You should be able to 
+press the `tab` key and get a list of conductances you can show, like this:
 
-	% compare some channels from the Prinz et al. paper
-    xolotl.show('prinz/NaV')
-    xolotl.show('prinz/Kd')
-    xolotl.show('prinz/KCa')
+![](https://user-images.githubusercontent.com/6005346/50981138-5135b600-14c8-11e9-9be7-b01203716a10.png)
 
-	
-
-See Also
---------
-
-- xolotl.plot
-- xolotl.getGatingFunctions
+!!! info "See Also"
+    ->xolotl.plot
+    ->xolotl.getGatingFunctions
 
 %}
 

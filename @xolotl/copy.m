@@ -5,21 +5,27 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-copy
-^^^^
+### copy
 
-copies a xolotl object. ``copy`` creates an identical copy of a xolotl object that can be manipulated seperately. Both copies will use the same binary to integrate, unless you add a new component to one of them. Syntax ::
+Syntax:
 
-    x2 = copy(x);
+```matlab
+x2 = copy(x);
+```
 
-.. warning::
+copies a xolotl object. ``copy`` creates an identical 
+copy of a xolotl object that can be manipulated separately.
+Both copies will use the same binary to integrate, 
+unless you add a new component to one of them. 
 
-Some read-only properties in a xolotl object may not be copied over. 
+!!! warning
+    * Some read-only properties in a xolotl object may not be copied over. 
+    * Do not make vectors of ``xolotl`` objects, as it may lead to undefined behavior. 
 
+!!! info "See Also"
+    ->cpplab.copy()
 
-.. warning::
-
-	Do not make vectors of ``xolotl`` objects, as it may lead to undefined behavior. 
+    * [How to copy models](https://xolotl.readthedocs.io/en/master/how-to/copy-models/)
 
 %}
 
@@ -40,8 +46,11 @@ for i = 1:length(props)
 	end
 end
 
-% copy cpplab propoerties by recurisvely calling copy
 C = self.Children;
+N.Children = {};
+
+% copy cpplab properties by recursively calling copy
+
 for i = 1:length(C)
 	NN = self.(C{i}).copy;
 	N.add(NN,C{i});

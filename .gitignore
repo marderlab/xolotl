@@ -17,3 +17,6 @@
 *.prj
 demos.xml
 last_build.kapalin
+*pref.m
+*.github_token.json
+site/

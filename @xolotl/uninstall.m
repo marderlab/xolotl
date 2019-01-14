@@ -5,12 +5,27 @@
    >  < (_) | | (_) | |_| |
   /_/\_\___/|_|\___/ \__|_|
 
-uninstall
-^^^^^^
-A static method that uninstalls your installation of xolotl in place. If you installed using git, ``xolotl`` will attempt to use git to uninstall itself. Usage ::
+### uninstall
 
-   xolotl.uninstall
-   x.uninstall
+**Syntax**
+
+```matlab
+xolotl.uninstall
+x.uninstall
+```
+
+
+**Description**
+
+A static method that uninstalls your installation 
+of xolotl in place. If you installed using git, 
+`xolotl` will attempt to use git to uninstall 
+itself. 
+
+
+
+!!! info "See Also"
+    ->xolotl.update
 
 %}
 

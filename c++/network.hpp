@@ -1,11 +1,17 @@
-// _  _ ____ _    ____ ___ _
-//  \/  |  | |    |  |  |  |
-// _/\_ |__| |___ |__|  |  |___
-//
-// class that defines a network
-// a network can either be a network of
-// single compartment neurons, or a
-// multi-compartment neuron
+/*
+
+This document describes the "network" C++ class.
+This class describes the network object, that is used
+as an entry point for all other objects. 
+
+| Abstract | can contain | contained in |
+| --------  | ------ | -------  |
+| no |  compartment | nothing (root) |
+
+
+
+*/
+
 
 #ifndef NETWORK
 #define NETWORK
@@ -33,13 +39,14 @@ public:
 
 
     double dt;
+    double sim_dt;
 
      // pointers to all compartments in network
     vector<compartment*> comp;
 
     // temperature
-    double temperature;
-    double temperature_ref;
+    double temperature = 11;
+    double temperature_ref = 11;
 
     // housekeeping
     int n_comp = 0;
@@ -59,57 +66,20 @@ public:
     void integrateClamp(double *);
     void addCompartment(compartment*);
     bool resolveTree(void);
-
     void checkSolvers(void);
-
-    void broadcast(double, double);
-
 };
 
-// broadcast is a method that tells all 
-// components of a network about some 
-// important parameters that are not
-// going to change
-void network::broadcast(double dt, double temperature)
-{
-    dt = dt;
-    for (int i = 0; i < n_comp; i ++) 
-    {
-        comp[i]->dt = dt;
-        for (int j = 0; j < comp[i]->n_cond; j ++) {
 
-            // configure verbosity
-            (comp[i]->getConductancePointer(j))->verbosity = verbosity;
-
-            (comp[i]->getConductancePointer(j))->dt = dt; 
-            (comp[i]->getConductancePointer(j))->temperature = temperature;
-
-            // built look up table if asked to 
-            // approximate gating functions 
-
-            (comp[i]->getConductancePointer(j))->buildLUT(approx_channels);
-  
-            
-        }
-        for (int j = 0; j < comp[i]->n_cont; j ++) {
-            (comp[i]->getMechanismPointer(j))->dt = dt;
-            (comp[i]->getMechanismPointer(j))->temperature = temperature;
-        }
-        for (int j = 0; j < comp[i]->n_syn; j ++) 
-        {
-            (comp[i]->getSynapsePointer(j))->dt = dt;
-            (comp[i]->getSynapsePointer(j))->temperature = temperature;
-        }
-
-    }
-}
-
-// this method checks that every component
-// in the network has a solver that supports
-// the requested order. if it doesn't, it 
-// throws an error 
-void network::checkSolvers(void)
-{
+/*
+This method verifies that all components can integrate
+using the requested solver order. What this method does
+is to call the `checkSolvers` in every compartment,
+which in turn calls the `checkSolvers` method in every 
+component contained in every compartment. 
+*/
+void network::checkSolvers(void) {
+    // we assume that every component supports
+    // the 0th order solver (Euler/exp Euler)
     if (solver_order == 0) { return;}
 
     for (int i = 0; i < n_comp; i ++){
@@ -118,29 +88,37 @@ void network::checkSolvers(void)
 
 }
 
+/*
+This method "resolves" a multi-compartment neuron model.
+What this means is that it works out which compartment
+is "upstream" (closer to the soma) or "downstream" (further
+from soma) for every compartment in a multi-compartment model. 
+It does so using the `tree_idx` property in every compartment, 
+setting it if need be. 
+
+It returns `true` if there is a multi-compartment neuron model
+somewhere in the network, and `false` otherwise. 
+
+*/
 bool network::resolveTree(void) {
     compartment * connected_comp = NULL;
     bool is_multi_comp = false;
-    if (verbosity > 0)
-    {
+    if (verbosity > 0) {
         mexPrintf("[C++] network::resolveTree() called\n");
     }
 
 
     // ttl =  this_tree_level
-    for (int ttl = 0; ttl < n_comp; ttl++)
-    {
+    for (int ttl = 0; ttl < n_comp; ttl++) {
         // find all compartments with this_tree_level
-        for (int i = 0; i < n_comp; i++)
-        {
+        for (int i = 0; i < n_comp; i++) {
             if (isnan(comp[i]->tree_idx)) {continue;}
             if ((comp[i]->tree_idx) != ttl) {continue;}
 
             // OK, this compartment has the tree level we 
             // are currently interested in 
 
-            if (comp[i]->tree_idx == 0)
-            {
+            if (comp[i]->tree_idx == 0) {
                 // mexPrintf("found a soma, calling it = %i\n",n_soma);
                 comp[i]->neuron_idx = n_soma;
                 n_soma++;
@@ -152,12 +130,10 @@ bool network::resolveTree(void) {
             // this compartment and check if they're Axial
             // and if so get pointers to those presyn compartments
 
-            for (int j = 0; j < comp[i]->n_axial_syn; j ++ )
-            {
+            for (int j = 0; j < comp[i]->n_axial_syn; j ++ ) {
                 connected_comp = comp[i]->getConnectedCompartment(j);
                 if (!connected_comp){continue;}
-                if (isnan(connected_comp->tree_idx))
-                {
+                if (isnan(connected_comp->tree_idx)) {
                     double child_tree_idx = ttl+1;
 
                     // set it 
@@ -230,54 +206,62 @@ bool network::resolveTree(void) {
 }
 
 
-// add a compartment to the network -- network contains
-// a vector of pointers to compartments
+/*
+This method adds a compartment to the network. It does the following things:
+1. adds a pointer to the compartment being added to a vector called `comp`
+2. Broadcasts certain global parameters like `temperature`, `dt`, etc to all compartments. 
+3. Updates `n_comp` to that network knows how many compartments there are.
+*/
 void network::addCompartment(compartment *comp_) {
     comp.push_back(comp_);
     n_comp++;
+    comp_->approx_channels = approx_channels;
+    comp_->dt = sim_dt;
     comp_->verbosity = verbosity;
     comp_->RT_by_nF = (0.0431)*(temperature + 273.15);
+    comp_->temperature = temperature;
+    comp_->temperature_ref = temperature_ref;
 
-    if (verbosity > 0)
-    {
+    if (verbosity > 0){
         mexPrintf("[C++] adding compartment to network. \n");
     }
 }
 
 
 
-// this integrate method is meant to use
-// a multi-step solver like a rk4 solver
-// this requires there to exist a solver
-// for every component that supports this 
-// order
+/*
+This method is used to integrate the network using a
+multi-step Runge Kutta solver. This method assumes that
+no compartment is being voltage clamped. 
+*/
 void network::integrateMS(double * I_ext_now) {
     // first move all variables to prev state in all comps
-    for (int i = 0; i < n_comp; i++)
-    {
+    for (int i = 0; i < n_comp; i++) {
         comp[i]->V_prev = comp[i]->V;
         comp[i]->Ca_prev = comp[i]->Ca;
         comp[i]->i_Ca_prev = comp[i]->i_Ca;
         comp[i]->I_ext = I_ext_now[i];
     }
 
-    for (int k = 0; k <= solver_order; k ++)
-    {
-        for (int i = 0; i < n_comp; i++)
-        {
+    for (int k = 0; k <= solver_order; k ++) {
+        for (int i = 0; i < n_comp; i++) {
             comp[i]->integrateMS(k);
         }
     }
 }
 
 
-// this integrate method works for networks
-// of single compartments, or cells with
-// multiple compartments under normal
-// conditions. Don't use if something is
-// being voltage clamped!
-void network::integrate(double * I_ext_now)
-{
+/*
+This method is used to integrate the network using the default
+single step solver. Typically, this means using the exponential-
+Euler method to integrate conductances and integrate the voltages
+and Calcium levels in compartments, though mechanisms can implement
+their own integration schemes. Multi-compartment models are 
+integrated using the Crank-Nicholson scheme.  
+
+This method assumes that no compartment anywhere is being voltage clamped. 
+*/
+void network::integrate(double * I_ext_now) {
 
     // we will use Exponential Euler for single-compartment
     // models and networks, and Crank-Nicholson for 
@@ -288,8 +272,7 @@ void network::integrate(double * I_ext_now)
     // as single compartments and integrated normally 
 
     // integrate all channels in all compartments
-    for (int i = 0; i < n_comp; i++)
-    {
+    for (int i = 0; i < n_comp; i++) {
 
         // move current values to previous values
         comp[i]->V_prev = comp[i]->V;
@@ -316,8 +299,7 @@ void network::integrate(double * I_ext_now)
 
     // integrate voltages in all single compartments
     // and calcium in all compartments
-    for (int i = 0; i < n_comp; i++)
-    {
+    for (int i = 0; i < n_comp; i++) {
         if (isnan(comp[i]->neuron_idx)) {
             comp[i]->integrateVoltage();
         } else {
@@ -328,9 +310,6 @@ void network::integrate(double * I_ext_now)
         }
         
     }
-
-
-
 
     // OK, now we have integrated all single compartments,
     // but in multi compartment models, the 
@@ -344,17 +323,14 @@ void network::integrate(double * I_ext_now)
     // down the cable
 
     // for each cable 
-    for (int nidx = 0; nidx < n_soma; nidx++)
-    {
+    for (int nidx = 0; nidx < n_soma; nidx++) {
 
         
         temp_comp = soma_comp[nidx];
 
-
         // go down the cable -- away from soma
         // to terminal, increasing in tree_idx
-        while (temp_comp)
-        {
+        while (temp_comp) {
             temp_comp->integrateCNFirstPass();
             last_valid_comp = temp_comp;
             temp_comp = temp_comp->downstream;
@@ -367,8 +343,7 @@ void network::integrate(double * I_ext_now)
 
         // go up the cable -- towards soma
         // away from terminal, decreasing in tree_idx
-        while (temp_comp)
-        {
+        while (temp_comp) {
             temp_comp->integrateCNSecondPass();
             temp_comp = temp_comp->upstream;
             // nothing after this, becaue temp_comp may be NULL
@@ -376,44 +351,100 @@ void network::integrate(double * I_ext_now)
     }
 }
 
-// integrate while voltage clamping some compartments 
-void network::integrateClamp(double *V_clamp)
-{
+/*
+This method is used to integrate the network using the default
+single step solver. Typically, this means using the exponential-
+Euler method to integrate conductances and integrate the voltages
+and Calcium levels in compartments, though mechanisms can implement
+their own integration schemes. Multi-compartment models are 
+integrated using the Crank-Nicholson scheme.  
+
+This method assumes that some compartment is being voltage clamped,
+and also assumes that no current is being injected into any compartment. 
+*/ 
+void network::integrateClamp(double *V_clamp) {
 
     // integrate all channels in all compartments
-    for (int i = 0; i < n_comp; i++)
-    {
+    for (int i = 0; i < n_comp; i++) {
 
         // move current values to previous values
         comp[i]->V_prev = comp[i]->V;
         comp[i]->Ca_prev = comp[i]->Ca;
         comp[i]->i_Ca_prev = comp[i]->i_Ca;
 
-
+        // reset values
         comp[i]->i_Ca = 0;
         comp[i]->I_ext = 0;
         comp[i]->I_clamp = 0;
 
+        comp[i]->integrateMechanisms();
         comp[i]->integrateChannels();
 
         // integrate synapses
-        comp[i]->integrateSynapses();
-    }
-
-    // integrate all voltages and Ca in all compartments
-    for (int i = 0; i < n_comp; i++)
-    {
-        
-        if (isnan(V_clamp[i])){
-
-            comp[i]->integrateVoltage();
-        } else {
-            comp[i]->integrateV_clamp(V_clamp[i]);
+        if (isnan(comp[i]->neuron_idx)) {
+            comp[i]->integrateSynapses();
         }
+    }
 
+
+    // set V_clamp in all the compartments
+    for (int i = 0; i < n_comp; i++) {
+        comp[i]->V_clamp = V_clamp[i];
+    }
+
+
+
+    // integrate all voltages in all single compartments
+    for (int i = 0; i < n_comp; i++) {
+        if (isnan(comp[i]->neuron_idx)) {
+            if (isnan(V_clamp[i])){
+                // not being clamped
+                comp[i]->integrateVoltage();
+            } else {
+                comp[i]->integrateV_clamp(V_clamp[i]);
+            }
+        }
+    } // end for loop over compartments
+
+
+    // now integrate the multi-compartments
+    // for each cable 
+    for (int nidx = 0; nidx < n_soma; nidx++) {
+
+        temp_comp = soma_comp[nidx];
+
+        // go down the cable -- away from soma
+        // to terminal, increasing in tree_idx
+        while (temp_comp) {
+            temp_comp->integrateCNFirstPass();
+            last_valid_comp = temp_comp;
+            temp_comp = temp_comp->downstream;
+            // nothing after this--temp_comp may be NULL
+        }
+        
+
+        temp_comp = last_valid_comp;
+
+        // go up the cable -- towards soma
+        // away from terminal, decreasing in tree_idx
+        while (temp_comp) {
+            if (isnan(temp_comp->V_clamp)) {
+                
+                temp_comp->integrateCNSecondPass();
+                
+            } else {
+                // try to compute the clamping current
+                // this is probably only approximately correct
+                temp_comp->integrateV_clamp(temp_comp->V_clamp);
+            }
+
+
+            temp_comp = temp_comp->upstream;
+            // nothing after this, because temp_comp may be NULL
+        }
     }
         
-}
+} // integrateClamp
 
 
 #endif

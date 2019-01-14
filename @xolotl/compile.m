@@ -5,25 +5,25 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-compile
-^^^^^^^
+### compile
 
-compiles a executable binary form a transpiled ``C++`` file. These are stored in your ``xolotl`` directory. ``xolotl`` automatically compiles when t needs to. You can turn this functionality off by setting ::
+**Syntax**
 
-    x.skip_hash = true;
+```matlab
+x.skip_hash = true;
+```
 
-In addition, creating a ``xolotl`` object through a function call does not utomatically hash and compile. In this case, you should use ``x.md5hash``.
+**Description**
 
-.. warning::
+compiles a executable binary form a transpiled ``C++`` file. 
+These are stored in your ``xolotl`` directory. ``xolotl`` 
+automatically compiles when t needs to. You can turn this 
+functionality off by setting
 
-If you turn hashing off, ``xolotl`` might not compile
 
-
-See Also:
----------
-
-- xolotl.transpile
-- xolotl.cleanup
+!!! info "See Also"
+    ->xolotl.transpile
+    ->xolotl.cleanup
 
 %}
 
@@ -44,16 +44,25 @@ if ispc
 else
 	ipath = ['-I"' self.xolotl_folder '/c++/"'];
 end
+
+if isunix && ~ismac
+	warning('off','MATLAB:mex:GccVersion');
+end
+
 if self.verbosity > 1
 	mex('-v',ipath,mexBridge_name,'-outdir',self.xolotl_folder)
 else
 	mex('-silent',ipath,mexBridge_name,'-outdir',self.xolotl_folder)
 end
 
+if isunix && ~ismac
+	warning('on','MATLAB:mex:GccVersion');
+end
+
 
 
 % update linked_binary
-self.linked_binary = ['X_' h '.' self.OS_binary_ext];
+self.linked_binary = ['X_' h '.' mexext];
 
 if self.verbosity > 0
 	disp(['[INFO] compilation successful!'])

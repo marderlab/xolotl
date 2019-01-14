@@ -5,12 +5,26 @@
    >  < (_) | | (_) | |_| |
   /_/\_\___/|_|\___/ \__|_|
 
-update
-^^^^^^
-A static method that updates your installation of xolotl in place. If you installed using git, ``xolotl`` will attempt to use git to update itself. Usage ::
+### update
 
-   xolotl.update
-   x.update
+**Syntax**
+
+
+```matlab
+xolotl.update()
+```
+
+
+**Description**
+
+A static method that updates your installation of 
+`xolotl` in place. If you installed using git, 
+`xolotl` will attempt to use git to update itself.
+
+
+
+!!! info "See Also"
+    ->xolotl.uninstall
 
 %}
 
@@ -43,7 +57,7 @@ else
 		xolotl.uninstall();
 
 		% download the new toolbox 
-		websave('xolotl.mltbx','https://drive.google.com/uc?id=19xddT00ObfsKHaa2T1YobZeA2C2qfuIh&export=download');
+		websave('xolotl.mltbx','https://github.com/sg-s/xolotl/releases/download/latest/xolotl.mltbx');
 
 		assert(exist('xolotl.mltbx') == 2,'Failed to download toolbox')
 

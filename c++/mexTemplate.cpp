@@ -13,9 +13,6 @@
 
 using namespace std;
 
-// declare global variable 
-// so that other code can access verbosity
-// double verbosity;
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -27,6 +24,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double *output_curr_state; // currents
     double *output_syn_state;  // synapses
     double *output_cont_state; // mechanisms
+    double * spiketimes; 
 
 
     //xolotl:define_v_clamp_idx
@@ -39,8 +37,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     //xolotl:input_declarations
 
 
-    // temperature wire-ups
+    // temperature and other wire-ups
     xolotl_network.temperature = temperature;
+    xolotl_network.temperature_ref = temperature_ref;
+
+    xolotl_network.sim_dt = sim_dt;
+    xolotl_network.dt = dt;
+
     xolotl_network.verbosity = verbosity;
     xolotl_network.approx_channels = approx_channels;
 
@@ -52,7 +55,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     //xolotl:add_conductances_here
 
 
-    vector<synapse*> synapses; // pointers to all synapses 
+    vector<synapse*> all_synapses; // pointers to all synapses 
     //xolotl:add_synapses_here
 
 
@@ -151,12 +154,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         output_syn_state = mxGetPr(plhs[5]);
     }
 
+    // return another output for spiketimes 
+    if (nlhs > 6) {
+        plhs[6] = mxCreateDoubleMatrix(nsteps_out, n_comp, mxREAL);
+        spiketimes = mxGetPr(plhs[6]);
+    }
+
     // link up I_ext and V_clamp
     double * I_ext = new double[n_comp];
     double * V_clamp = new double[n_comp];
     double * I_ext_in = mxGetPr(prhs[1]);
     double * V_clamp_in = mxGetPr(prhs[2]);
 
+
+    // create arrays to help us find spikes
+    // and return just the spiketimes
+    double * prev_V = new double[n_comp]; 
+    int * spike_time_idx = new int[n_comp]; 
+    int spikes_only = 0;
+    if (output_type == 2){
+        // mexPrintf("Returning spiketimes instead of voltage..\n");
+        spikes_only = 1;
+        for (int i = 0; i < n_comp; i ++){
+            spike_time_idx[i] = 0;
+            prev_V[i] = -200;
+        }
+    }
 
     // figure out the sizes of the arrays 
     // for V_clamp and I_ext
@@ -234,9 +257,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexErrMsgTxt("[xolotl] multi-compartment models cannot be integrated with multi-step methods yet. \n");
     }
 
-    if (is_multi_comp & is_voltage_clamped){
-        mexErrMsgTxt("[xolotl] multi-compartment models cannot be integrated when something is clamped yet. \n");
-    }
+    // if (is_multi_comp & is_voltage_clamped){
+    //     mexErrMsgTxt("[xolotl] multi-compartment models cannot be integrated when something is clamped yet. \n");
+    // }
 
 
     int output_idx = 0; 
@@ -251,7 +274,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
     // tell all components about some core 
     // parameters
-    xolotl_network.broadcast(sim_dt, temperature);
+    // xolotl_network.broadcast(sim_dt, temperature);
 
     if (!is_voltage_clamped & !is_multi_step){
  
@@ -277,7 +300,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             // here we're getting the state of every compartment -- V, Ca, and all conductances
             if (i%res == 0) {
 
-
                 switch (nlhs)
                 {
                     case 1:
@@ -285,12 +307,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                         break;
                     case 2:
                         // read out voltages only
-                        for (int j = 0; j < n_comp; j++)
-                        {
+                        for (int j = 0; j < n_comp; j++) {
                             output_V[output_idx*n_comp + j] = xolotl_network.comp[j]->V;
                         } // end j loop over compartments
                         break;
-
 
                     case 3:
                         // V + Ca
@@ -335,7 +355,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 
-                    case 6: 
+                    default:
                         // V, Ca, Ca, I, Syn
                         for (int j = 0; j < n_comp; j++)
                         {
@@ -351,14 +371,39 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
                         for (int k = 0; k < n_synapses; k++)
                         {
-                            syn_idx = (synapses[k]->getFullState(output_syn_state,syn_idx));
+                            syn_idx = (all_synapses[k]->getFullState(output_syn_state,syn_idx));
                         }
 
                         break;
                 } // switch
                 output_idx ++;
 
-            } // if we need to write output 
+
+
+            } // if we need to write output
+
+
+
+            // do we need to return spike times? 
+            switch (spikes_only){
+
+                case 0:
+                    break;
+                case 1:
+                    // must return just spike times
+                    for (int j = 0; j < n_comp; j++) {
+                        if ((prev_V[j] < spike_thresh) && ((xolotl_network.comp[j]->V) > spike_thresh)) {
+                            spiketimes[spike_time_idx[j] + j*nsteps_out] = i;
+                            spike_time_idx[j]++;
+                        } 
+                        prev_V[j] = xolotl_network.comp[j]->V;
+                    } // end j loop over compartments
+                    break;
+            }
+
+
+                            
+
         } // end for loop over nsteps
 
 
@@ -483,11 +528,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 // state of all synapses
                 if (nlhs > 5) {
                     for (int k = 0; k < n_synapses; k++) {
-                        syn_idx = (synapses[k]->getFullState(output_syn_state,syn_idx));
+                        syn_idx = (all_synapses[k]->getFullState(output_syn_state,syn_idx));
                     }
                 }
                 output_idx ++;
             } // end read out variables
+
+
+
+            // do we need to return spike times? 
+            switch (spikes_only){
+
+                case 0:
+                    break;
+                case 1:
+                    // must return just spike times
+                    for (int j = 0; j < n_comp; j++) {
+                        if ((prev_V[j] < spike_thresh) && ((xolotl_network.comp[j]->V) > spike_thresh)) {
+                            spiketimes[spike_time_idx[j] + j*nsteps_out] = i;
+                            spike_time_idx[j]++;
+                        } 
+                        prev_V[j] = xolotl_network.comp[j]->V;
+                    } // end j loop over compartments
+                    break;
+            }
 
 
         } // end for loop over nsteps

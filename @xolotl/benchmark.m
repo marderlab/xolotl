@@ -5,12 +5,26 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-benchmark
-^^^^^^^^^
+###  benchmark
 
-performs a quick benchmarking of a given ``xolotl`` model. ``benchmark`` first varies the simulation time step, and measures how quickly the model integrates. It then varies ``t_end``, and measures how fast it integrates at a fixed ``sim_dt``. Usage ::
+**Syntax**
 
-    x.benchmark;
+```matlab
+x.benchmark;
+```
+
+**Description**
+
+performs a quick benchmarking of a given `xolotl` model. 
+`benchmark` first varies the simulation time step, and 
+measures how quickly the model integrates. It then 
+varies `t_end`, and measures how fast it integrates 
+at a fixed `sim_dt`. 
+
+It should produce a figure that looks something like this 
+(the exact figure will depend on the model and your hardware):
+
+![](https://user-images.githubusercontent.com/6005346/50046554-1714f800-0073-11e9-9b1f-f136baff7976.png)
 
 
 %}
@@ -24,6 +38,7 @@ original_t_end = self.t_end;
 original_state = self.closed_loop;
 
 self.t_end = 10e3;
+x.closed_loop = true;
 self.integrate;
 
 self.closed_loop = false;
@@ -44,7 +59,7 @@ V0 = self.integrate;
 all_speed(1) = toc;
 
 for j = size(V0,2):-1:1
-	[M0(:,:,j), V_lim(:,j), dV_lim(:,j)] = xolotl.V2matrix(V0(:,j));
+	[M0(:,:,j), V_lim(:,j), dV_lim(:,j)] = xtools.V2Matrix(V0(:,j));
 end
 
 
@@ -59,8 +74,8 @@ for i = 2:length(all_dt)
 
 	this_q = 0;
 	for j = 1:size(V0,2)
-		M(:,:,j) = xolotl.V2matrix(V(:,j),V_lim(:,j),dV_lim(:,j));
-		this_q =  this_q + xolotl.matrixCost(M(:,:,j),M0(:,:,j));
+		M(:,:,j) = xtools.V2Matrix(V(:,j),V_lim(:,j),dV_lim(:,j));
+		this_q =  this_q + xtools.matrixCost(M(:,:,j),M0(:,:,j));
 	end
 
 

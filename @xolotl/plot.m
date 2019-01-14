@@ -5,23 +5,35 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-plot
-^^^^
+### plot
 
-Makes a plot of voltage and calcium time series of all compartments. The default option is to color the voltage traces by the dominant current at that point using  ``contributingCurrents`` and to also show the Calcium concentration on the same plot. Usage ::
+**Syntax**
 
-   x.plot()
+```matlab
+x.plot()
+```
 
-If you want to turn off the colouring, or to hide the Calcium concentration, change your preference using ::
+** Description**
 
-	setpref('xolotl','plot_color',false)
-	setpref('xolotl','show_Ca',false)
+`x.plot` makes a plot of voltage and calcium time series of all 
+compartments. The default option is to color the voltage
+traces by the dominant current at that point using  
+`contributingCurrents` and to also show the Calcium 
+concentration on the same plot. 
 
-See Also
---------
 
-- xolotl.manipulate
-- xolotl.contributingCurrents
+If you want to turn off the coloring, or to hide the 
+Calcium concentration, change your preference using:
+
+
+```matlab
+x.pref.plot_color = false;
+x.pref.show_Ca = false;
+```
+
+!!! info "See Also"
+    ->xolotl.manipulate
+    ->xolotl.contributingCurrents
 
 %}
 
@@ -31,6 +43,9 @@ function plot(self, ~)
 comp_names = self.find('compartment');
 N = length(comp_names);
 c = lines(100);
+
+output_type = self.output_type;
+self.output_type = 0;
 
 if isempty(self.handles) || ~isfield(self.handles,'fig') || ~isvalid(self.handles.fig)
 	if N == 1
@@ -53,33 +68,37 @@ if isempty(self.handles) || ~isfield(self.handles,'fig') || ~isvalid(self.handle
 	
 	for i = 1:N
 
-		if getpref('xolotl','show_Ca',true)
+		if self.pref.show_Ca
 			yyaxis(self.handles.ax(i),'left')
 		end
 		
 		cond_names = self.(comp_names{i}).find('conductance');
 
-		if getpref('xolotl','plot_color',true)
+		if self.pref.plot_color
 
 			for j = 1:length(cond_names)
-				self.handles.plots(i).ph(j) = plot(self.handles.ax(i),NaN,NaN, 'Color', c(j,:),'LineWidth',3);
+				self.handles.plots(i).ph(j) = plot(self.handles.ax(i),NaN,NaN, 'Color', c(j,:),'LineWidth',2);
 			end
 		else
 			self.handles.plots(i).ph = plot(self.handles.ax(i),NaN,NaN, 'Color', 'k','LineWidth',1.5);
 		end
 
 		xlabel(self.handles.ax(i),'Time (s)')
-		ylabel(self.handles.ax(i),['V_{ ' comp_names{i} '} (mV)'])
+		if isnan(sum(self.V_clamp(:,i)))
+			ylabel(self.handles.ax(i),['V_{ ' comp_names{i} '} (mV)'])
+		else
+			ylabel(self.handles.ax(i),['I_{clamp, ' comp_names{i} '} (nA)'])
+		end
 
 		% make calcium dummy plots
 		
-		if getpref('xolotl','show_Ca',true)
+		if self.pref.show_Ca
 			yyaxis(self.handles.ax(i),'right')
 			self.handles.Ca_trace(i) = plot(self.handles.ax(i),NaN,NaN,'Color','k');
 			ylabel(self.handles.ax(i),['[Ca^2^+]_{' comp_names{i} '} (uM)'] )
 		end
 
-		if getpref('xolotl','show_Ca',true) & getpref('xolotl','plot_color',true)
+		if self.pref.show_Ca & self.pref.plot_color
 			lh = legend([self.handles.plots(i).ph self.handles.Ca_trace(i)],[cond_names; '[Ca]']);
 			lh.Location = 'eastoutside';
 
@@ -123,7 +142,7 @@ for i = 1:N
 	curr_index = xolotl.contributingCurrents(this_V, this_I);
 
 	% show voltage
-	if getpref('xolotl','plot_color',true)
+	if self.pref.plot_color
 		for j = 1:size(this_I,2)
 			Vplot = this_V;
 			Vplot(curr_index ~= j) = NaN;
@@ -140,7 +159,7 @@ for i = 1:N
 
 
 	% and now show calcium
-	if getpref('xolotl','show_Ca',true)
+	if self.pref.show_Ca
 		self.handles.Ca_trace(i).XData = time;
 		self.handles.Ca_trace(i).YData = Ca(:,i);
 		if isnan(max_Ca)
@@ -153,6 +172,7 @@ for i = 1:N
 
 end
 
+
 if strcmp(self.handles.ax(1).XLimMode,'auto')
 	set(self.handles.ax(1),'XLim',[0 max(time)]);
 	self.handles.ax(1).XLimMode = 'auto';
@@ -162,3 +182,5 @@ try
 	prettyFig('plw',1,'lw',1);
 catch
 end
+
+self.output_type = output_type;

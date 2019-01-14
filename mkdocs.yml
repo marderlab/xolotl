@@ -1,0 +1,78 @@
+site_name: xolotl
+repo_url: https://github.com/sg-s/xolotl/
+site_author: Srinivas Gorur-Shandilya
+docs_dir: 'docs'
+theme: 
+  name: 'material' 
+  logo: 'images/Xlogo.png'
+  palette:
+    primary: 'deep-purple'
+    accent: 'deep-purple'
+pages:
+  - Home: index.md
+  - Tutorials:
+    - Getting Started: 'tutorials/start-here.md'
+    - Demos: 'tutorials/built-in-demos.md'
+    - Your first neuron: 'tutorials/first-neuron.md'
+    - Your first network: 'tutorials/first-network.md'
+  - How to: 
+    - Install and configure: how-to/install-configure.md
+    - Construct models: how-to/construct-models.md
+    - Discover existing components: how-to/discover-components.md
+    - Specify initial conditions: how-to/specify-initial-conditions.md
+    - Modify existing models: how-to/change-existing-models.md
+    - Copy a model: how-to/copy-models.md
+    - Save and load models: how-to/save-load-models.md
+    - Run simulations: how-to/run-simulations.md
+    - Voltage clamp a compartment: how-to/voltage-clamp.md
+    - Inject current: how-to/inject-current.md
+    - Make plots: how-to/make-plots.md
+    - Save configurations and use snapshots: how-to/snapshots.md
+    - Make your own components: how-to/make-own-models.md
+    - Manipulate a model: how-to/manipulate.md
+    - Create multi-compartment models: how-to/create-multi-compartment-models.md
+  - Reference: 
+    - Units: 'reference/units.md'
+    - C++ classes: 
+      - conductance: 'reference/c++/conductance.md'
+      - compartment: 'reference/c++/compartment.md'
+      - synapse: 'reference/c++/synapse.md'
+      - network: 'reference/c++/network.md'
+      - mechanism: 'reference/c++/mechanism.md'
+    - MATLAB classes:
+      - conductance: reference/matlab/conductance.md
+      - xtools: reference/matlab/xtools.md
+      - xtest: reference/matlab/xtest.md
+      - xolotl: reference/matlab/xolotl.md
+      - cpplab: reference/matlab/cpplab.md
+  - How xolotl works:
+    - How cpplab binds code: explanation/cpplab.md
+    - How equations are integrated: explanation/integration.md
+    - How xolotl transpiles code: explanation/transpile.md
+    - How xolotl interfaces with its binary: explanation/mex-interface.md
+    - How hashing works in xolotl and cpplab: explanation/hashing.md
+  - Performance tips:
+    - Speed: 'performance/speed.md'
+    - Memory: 'performance/memory.md'
+  - Troubleshooting: 
+    - Fixes to common problems: troubleshooting.md
+  - Meta: 
+    - Development and future: 'meta/future.md'
+    - Documentation: 'meta/documentation.md'
+    - Testing: 'meta/testing.md'
+  - FAQ: 'faq.md'
+  - Contributing: 'contributing.md'
+  - License: 'license.md'
+
+use_directory_urls: true
+
+markdown_extensions:
+  - admonition
+  - mdx_math:
+      enable_dollar_delimiter: True #for use of inline $..$
+  - toc:
+      permalink: true
+  - codehilite
+   
+# Required to load the MathJax javascript for the mdx_math.py
+extra_javascript: ['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML']

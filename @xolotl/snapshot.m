@@ -5,38 +5,39 @@
     >  < (_) | | (_) | |_| |
    /_/\_\___/|_|\___/ \__|_|
 
-snapshot
-^^^^^^^^
+### snapshot
 
-Saves the current state of a ``xolotl`` object for future use. Usage ::
+**Syntax**
 
-   x.snapshot('snap_name')
+```matlab
+x.snapshot('snap_name')
+```
+
+**Description**
+
+Saves the current state of a ``xolotl`` object for future use. 
 
 
-.. warning::
+!!! warning
+    Creating two snapshots with the same name will overwrite the first. 
 
-Creating two snapshots with the same name will overwrite the first. 
 
+**Example**
 
-Example
--------
-
-::
-
-		% assuming a xolotl object is set up
-		x.integrate;
-		x.snapshot('base');
-		x.set('*gbar') = 1e-3; % turn off all conductances
-		x.integrate;
-		% now go back to original state
-		x.reset('base')
-
+```
+% assuming a xolotl object is set up
+x.integrate;
+x.snapshot('base');
+x.set('*gbar') = 1e-3; % turn off all conductances
+x.integrate;
+% now go back to original state
+x.reset('base')
+```
 	
 
-See Also
---------
-
-- xolotl.reset
+!!! info "See Also"
+    ->xolotl.reset
+    * [How to: save configurations and use snapshots](https://xolotl.readthedocs.io/en/master/how-to/snapshots/)
 
 %}
 
