@@ -1,77 +1,78 @@
-%{
 
-;;     ;; ;;;;;;;;  ;;;;;;;   ;;;;;;;  ;;        ;;;;;;
- ;;   ;;     ;;    ;;     ;; ;;     ;; ;;       ;;    ;;
-  ;; ;;      ;;    ;;     ;; ;;     ;; ;;       ;;
-   ;;;       ;;    ;;     ;; ;;     ;; ;;        ;;;;;;
-  ;; ;;      ;;    ;;     ;; ;;     ;; ;;             ;;
- ;;   ;;     ;;    ;;     ;; ;;     ;; ;;       ;;    ;;
-;;     ;;    ;;     ;;;;;;;   ;;;;;;;  ;;;;;;;;  ;;;;;;
-
-### V2metrics
-
-**Syntax**
-
-```matlab
-options = xtools.V2metrics
-metrics = xtools.V2metrics(V)
-metrics = xtools.V2metrics(V, options)
-metrics = xtools.V2metrics(V, 'PropertyName', PropertyValue, ...)
-```
-
-**Description**
-
-Computes metrics from a raw time series of voltage, 
-which can be experimental or simulated data.
-
-If called without arguments or outputs, a struct
-containing fields for all optional arguments, `options`, 
-is created.
-
-`V2metrics` can be called using a struct to specify 
-options, or with individual options specified as name, value keyword pairs. Options with a `NaN` value are ignored
-and the default option value is used instead.
-
-| Option Name | Default Value | Units |
-| ----------- | ------------- |
-| `sampling_rate` | 20 | 1/ms |
-| `ibi_thresh` | 300 | ms |
-| `spike_threshold` | 0 | mV |
-| `debug` | false | |
-
-| Metric Name | Units |
-| ----------- | ----- |
-| `firing_rate` | NaN | ? |
-| `burst_period` | NaN | ? |
-| `ibi_mean` | NaN | ? |
-| `ibi_std` | NaN | ? |
-| `isi_std` | NaN | ? |
-| `burst_period_std` | NaN | ? |
-| `isi_std` | NaN | ? |
-| `duty_cycle_mean` | NaN | ? |
-| `n_spikes_per_burst_mean` | NaN | ? |
-| `n_spikes_per_burst_std` | NaN | ? |
-| `min_V_mean` | NaN | ? |
-| `min_V_std` | NaN | ? |
-| `min_V_in_burst_mean` | NaN | ? |
-| `min_V_in_burst_std` | NaN | ? |
-| `spike_peak_mean`  | NaN | ? |
-| `spike_peak_std` | NaN | ? |
-
-
-!!! info "See Also"
-    ->xtools.findNSpikes
-	->xtools.findNSpikeTimes
-	->xtools.findBurstMetrics
-	LeMasson G, Maex R (2001) Introduction to equation solving and parameter fitting. In: De Schutter E (ed) Computational Neuroscience: Realistic Modeling for Experimentalists. CRC Press, London pp 1–21
-
-
-%}
-
-function metrics = V2metrics(V, varargin)
+%
+% ;;     ;; ;;;;;;;;  ;;;;;;;   ;;;;;;;  ;;        ;;;;;;
+%  ;;   ;;     ;;    ;;     ;; ;;     ;; ;;       ;;    ;;
+%   ;; ;;      ;;    ;;     ;; ;;     ;; ;;       ;;
+%    ;;;       ;;    ;;     ;; ;;     ;; ;;        ;;;;;;
+%   ;; ;;      ;;    ;;     ;; ;;     ;; ;;             ;;
+%  ;;   ;;     ;;    ;;     ;; ;;     ;; ;;       ;;    ;;
+% ;;     ;;    ;;     ;;;;;;;   ;;;;;;;  ;;;;;;;;  ;;;;;;
+%
+% ### V2metrics
+%
+% **Syntax**
+%
+% ```matlab
+% options = xtools.V2metrics
+% metrics = xtools.V2metrics(V)
+% metrics = xtools.V2metrics(V, options)
+% metrics = xtools.V2metrics(V, 'PropertyName', PropertyValue, ...)
+% ```
+%
+% **Description**
+%
+% Computes metrics from a raw time series of voltage,
+% which can be experimental or simulated data.
+%
+% If called without arguments or outputs, a struct
+% containing fields for all optional arguments, `options`,
+% is created.
+%
+% `V2metrics` can be called using a struct to specify
+% options, or with individual options specified as name, value keyword pairs. Options with a `NaN` value are ignored
+% and the default option value is used instead.
+%
+% | Option Name | Default Value | Units |
+% | ----------- | ------------- | ----- |
+% | `sampling_rate` | 20 | 1/ms |
+% | `ibi_thresh` | 300 | ms |
+% | `spike_threshold` | 0 | mV |
+% | `debug` | false | |
+%
+% | Metric Name | Default Value | Units |
+% | ----------- | ----- | ----- |
+% | `firing_rate` | NaN | ? |
+% | `burst_period` | NaN | ? |
+% | `ibi_mean` | NaN | ? |
+% | `ibi_std` | NaN | ? |
+% | `isi_std` | NaN | ? |
+% | `burst_period_std` | NaN | ? |
+% | `isi_std` | NaN | ? |
+% | `duty_cycle_mean` | NaN | ? |
+% | `n_spikes_per_burst_mean` | NaN | ? |
+% | `n_spikes_per_burst_std` | NaN | ? |
+% | `min_V_mean` | NaN | ? |
+% | `min_V_std` | NaN | ? |
+% | `min_V_in_burst_mean` | NaN | ? |
+% | `min_V_in_burst_std` | NaN | ? |
+% | `spike_peak_mean`  | NaN | ? |
+% | `spike_peak_std` | NaN | ? |
+%
+%
+% !!! info "See Also"
+%     xtools.findNSpikes
+% 	  xtools.findNSpikeTimes
+% 	  xtools.findBurstMetrics
+%     LeMasson G, Maex R (2001) Introduction to equation solving and parameter fitting. In: De Schutter E (ed) Computational Neuroscience: Realistic Modeling for Experimentalists. CRC Press, London pp 1–21
+%
 
 
-metrics = orderfields(struct('firing_rate',NaN,'burst_period',NaN,'ibi_mean',NaN,'ibi_std',NaN,'isi_mean',NaN,'burst_period_std',NaN,'isi_std',NaN,'duty_cycle_mean',NaN,'duty_cycle_std',NaN,'n_spikes_per_burst_mean',NaN,'n_spikes_per_burst_std',NaN,'min_V_mean',NaN,'min_V_std',NaN,'min_V_in_burst_mean',NaN,'min_V_in_burst_std',NaN,'spike_peak_mean',NaN,'spike_peak_std',NaN,'ibi_thresh',NaN));
+
+function [metrics, burst_starts, burst_ends] = V2metrics(V, varargin)
+
+burst_starts = [];
+burst_ends = [];
+metrics = orderfields(struct('firing_rate',NaN,'burst_period',NaN,'ibi_mean',NaN,'ibi_std',NaN,'isi_mean',NaN,'burst_period_std',NaN,'isi_std',NaN,'duty_cycle_mean',NaN,'duty_cycle_std',NaN,'n_spikes_per_burst_mean',NaN,'n_spikes_per_burst_std',NaN,'min_V_mean',NaN,'min_V_std',NaN,'min_V_in_burst_mean',NaN,'min_V_in_burst_std',NaN,'spike_peak_mean',NaN,'spike_peak_std',NaN,'ibi_thresh',NaN,'isi_max',NaN,'isi_min',NaN,'min_V_bw_burst_mean',NaN,'min_V_bw_burst_std',NaN));
 
 % options and defaults
 options.sampling_rate = 20; % samples per millisecond
@@ -85,37 +86,18 @@ if nargout && ~nargin
 end
 
 % validate and accept options
-if iseven(length(varargin))
-	for ii = 1:2:length(varargin)-1
-	temp = varargin{ii};
-    if ischar(temp)
-    	if ~any(find(strcmp(temp,fieldnames(options))))
-    		disp(['Unknown option: ' temp])
-    		disp('The allowed options are:')
-    		disp(fieldnames(options))
-    		error('UNKNOWN OPTION')
-    	else
-    		options.(temp) = varargin{ii+1};
-    	end
-    end
-end
-elseif isstruct(varargin{1})
-	% should be OK...
-	options = varargin{1};
-else
-	error('Inputs need to be name value pairs')
-end
+options = corelib.parseNameValueArguments(options,varargin{:});
 
 
-assert(isvector(V),'V should be a vector')
+corelib.assert(isvector(V),'V should be a vector')
 V = V(:);
-assert(~any(isnan(V)),'V cannot have NaNs')
-assert(~any(isinf(V)),'V cannot have Inf')
-assert((isreal(V)),'V cannot be complex')
+corelib.assert(~any(isnan(V)),'V cannot have NaNs')
+corelib.assert(~any(isinf(V)),'V cannot have Inf')
+corelib.assert((isreal(V)),'V cannot be complex')
 
 % find spikes in voltage trace
-n_spikes = xtools.findNSpikes(V);
-spiketimes = xtools.findNSpikeTimes(V,n_spikes);
+n_spikes = xtools.findNSpikes(V,options.spike_threshold);
+spiketimes = xtools.findNSpikeTimes(V,n_spikes,options.spike_threshold);
 
 spiketimes(spiketimes > length(V)) = [];
 
@@ -130,7 +112,8 @@ metrics.firing_rate = (1e3*n_spikes)/(length(V)/options.sampling_rate);
 % find ISI
 metrics.isi_mean = mean(diff(spiketimes))/options.sampling_rate;
 metrics.isi_std = std(diff(spiketimes))/options.sampling_rate;
-
+metrics.isi_max = max(diff(spiketimes))/options.sampling_rate;
+metrics.isi_min = min(diff(spiketimes))/options.sampling_rate;
 
 % measure some statistics about the extrema of
 % the voltage trace
@@ -199,6 +182,7 @@ all_dc = NaN*burst_starts;
 all_n_spikes = NaN*burst_starts;
 all_min_V = NaN*burst_starts;
 all_min_V_in_burst = NaN*burst_starts;
+all_min_V_bw_burst = NaN*burst_starts;
 
 for i = 2:length(all_dc)
 	all_n_spikes(i) = sum(spiketimes >= burst_starts(i) & spiketimes <= burst_ends(i));
@@ -207,7 +191,15 @@ for i = 2:length(all_dc)
 	all_min_V(i) = min(V(burst_ends(i-1):burst_ends(i)));
 
 	all_dc(i) = (burst_ends(i) - burst_starts(i))/(burst_ends(i) - burst_ends(i-1));
+
+	try
+		all_min_V_bw_burst(i) = V(round(burst_ends(i) + ((burst_starts(i) - burst_ends(i-1)))/2));
+	catch
+	end
 end
+
+metrics.min_V_bw_burst_mean = nanmean(all_min_V_bw_burst);
+metrics.min_V_in_burst_std = nanstd(all_min_V_bw_burst);
 
 
 metrics.min_V_in_burst_mean = mean(all_min_V_in_burst(2:end));

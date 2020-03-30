@@ -1,32 +1,33 @@
-%{   
-             _       _   _ 
-  __  _____ | | ___ | |_| |
-  \ \/ / _ \| |/ _ \| __| |
-   >  < (_) | | (_) | |_| |
-  /_/\_\___/|_|\___/ \__|_|
 
-### transpileCore
+%              _       _   _ 
+%   __  _____ | | ___ | |_| |
+%   \ \/ / _ \| |/ _ \| __| |
+%    >  < (_) | | (_) | |_| |
+%   /_/\_\___/|_|\___/ \__|_|
+%
+% ### transpileCore
+%
+% **Syntax**
+%
+% ```matlab
+% x.transpileCore(in_file,out_file)
+% ```
+%
+% **Description**
+%
+% method that writes C++ bridge code to set up
+% and integrate your model based on the
+% objects configured in the xolotl tree. This is
+% internally called by xolotl.transpile()
+%
+% Do not call this method. It is not meant
+% to be user accessible.
+%
+% See Also: 
+% xolotl.transpile
+% 
 
-**Syntax**
 
-```matlab
-x.transpileCore(in_file,out_file)
-```
-
-**Description**
-
-method that writes C++ bridge code to set up
-and integrate your model based on the 
-objects configured in the xolotl tree. This is 
-internally called by xolotl.transpile()
-
-Do not call this method. It is not meant 
-to be user accessible. 
-
-!!! info "See Also"
-    ->xolotl.transpile
-
-%}
 
 function transpileCore(self,in_file,out_file)
 
@@ -36,26 +37,44 @@ if self.verbosity > 0
 end
 
 % read lines from mexTemplate
-cppfilename = joinPath(self.cpp_folder,in_file);
-lines = lineRead(cppfilename);
+cppfilename = pathlib.join(self.cpp_folder,in_file);
+lines = filelib.read(cppfilename);
 
 % insert network header and other critical headers
-header_files{1} = joinPath(self.cpp_folder,'network.hpp');
-header_files{2} = joinPath(self.cpp_folder,'compartment.hpp');
-header_files{3} = joinPath(self.cpp_folder,'synapse.hpp');
-header_files{4} = joinPath(self.cpp_folder,'conductance.hpp');
-header_files{5} = joinPath(self.cpp_folder,'mechanism.hpp');
+% the specific ordering here is EXTREMELY important
+% and goes a long way in resolving circular dependencies 
+header_files{1} = pathlib.join(self.cpp_folder,'conductance.hpp');
+header_files{2} = pathlib.join(self.cpp_folder,'synapse.hpp');
+header_files{3} = pathlib.join(self.cpp_folder,'mechanism.hpp');
+header_files{4} = pathlib.join(self.cpp_folder,'compartment.hpp');
+header_files{5} = pathlib.join(self.cpp_folder,'network.hpp');
+header_files{6} = pathlib.join(self.cpp_folder,'conductance2.hpp');
+
 temp = self.generateHeaders; temp = temp(:);
 temp(cellfun(@isempty,temp)) = [];
-header_files = [header_files(:); unique(temp(:))];
+
+temp = unique(temp(:));
+
+% make sure no header files are duplicated
+rm_this = false(length(temp),1);
+for i = 1:length(rm_this)
+	for j = 1:length(header_files)
+		if strcmp(temp{i},header_files{j})
+			rm_this(i) = true;
+		end
+	end
+end
+temp(rm_this) = [];
+
+header_files = [header_files(:); temp];
 
 
 for i = 1:length(header_files)
-	header_files{i} = strcat('#include "',header_files{i}, '"'); 
+	header_files{i} = strcat('#include "',header_files{i}, '"');
 end
 
-insert_here = lineFind(lines,'//xolotl:include_headers_here');
-assert(length(insert_here)==1,'Could not find insertion point for headers')
+insert_here = filelib.find(lines,'//xolotl:include_headers_here');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for headers')
 lines = [lines(1:insert_here); header_files(:); lines(insert_here+1:end)];
 
 
@@ -70,18 +89,18 @@ for j = 1:length(names)
 	input_hookups{end+1} = ['double ' names{j} ' = params[' mat2str(j-1) '];'];
 end
 input_hookups{end+1} = ['int param_size = ' mat2str(length(names)) ';'];
-insert_here = lineFind(lines,'//xolotl:input_declarations');
-assert(length(insert_here)==1,'Could not find insertion point for input declarations')
+insert_here = filelib.find(lines,'//xolotl:input_declarations');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for input declarations')
 lines = [lines(1:insert_here); input_hookups(:); lines(insert_here+1:end)];
 
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% make all the C++ objects 
+% make all the C++ objects
 [constructors, class_parents, obj_names] = self.generateConstructors;
 
 
-insert_here = lineFind(lines,'//xolotl:insert_constructors');
-assert(length(insert_here)==1,'Could not find insertion point for object constructors')
+insert_here = filelib.find(lines,'//xolotl:insert_constructors');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for object constructors')
 lines = [lines(1:insert_here); constructors(:); lines(insert_here+1:end)];
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -90,7 +109,7 @@ lines = [lines(1:insert_here); constructors(:); lines(insert_here+1:end)];
 
 % sort all objects by length of object name
 % this is to make sure we find the longest object
-% string in names later on 
+% string in names later on
 [~,sort_idx] = sort(cellfun(@(x) length(x), obj_names));
 obj_names = obj_names(sort_idx);
 class_parents = class_parents(sort_idx);
@@ -99,7 +118,7 @@ class_parents = class_parents(sort_idx);
 output_hookups = {};
 for j = length(real_names):-1:1
 	% try to figure out what the object is
-	% that contains this variable 
+	% that contains this variable
 
 	last_dot_idx = max(strfind(real_names{j},'.'));
 
@@ -116,8 +135,8 @@ for j = length(real_names):-1:1
 end
 
 
-insert_here = lineFind(lines,'//xolotl:read_state_back');
-assert(length(insert_here)==1,'Could not find insertion point for input declarations')
+insert_here = filelib.find(lines,'//xolotl:read_state_back');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for input declarations')
 lines = [lines(1:insert_here); output_hookups(:); lines(insert_here+1:end)];
 
 
@@ -137,8 +156,8 @@ for i = 1:length(all_channels)
 end
 
 
-insert_here = lineFind(lines,'//xolotl:add_conductances_here');
-assert(length(insert_here)==1,'Could not find insertion point for conductance->cell hookups')
+insert_here = filelib.find(lines,'//xolotl:add_conductances_here');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for conductance->cell hookups')
 lines = [lines(1:insert_here); channel_hookups(:); lines(insert_here+1:end)];
 
 
@@ -154,22 +173,22 @@ for i = length(self.synapses):-1:1
 end
 
 
-insert_here = lineFind(lines,'//xolotl:add_synapses_here');
-assert(length(insert_here)==1,'Could not find insertion point for synapse->cell hookups')
+insert_here = filelib.find(lines,'//xolotl:add_synapses_here');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for synapse->cell hookups')
 lines = [lines(1:insert_here); synapse_add_lines(:); lines(insert_here+1:end)];
 
 
 % ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % add the mechanisms here ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% mechanisms work like this: every mechanism must have a pointer to a 
+% mechanisms work like this: every mechanism must have a pointer to a
 % a conductance, and in addition, must be handed over to the containing
-% compartment using .addMechanism 
-% 
+% compartment using .addMechanism
+%
 
 mechanism_add_lines = {};
 
 
-% first, we need to add mechanism to the 
+% first, we need to add mechanism to the
 % channels/synapses they control and then
 % we need to add them to the compartment they are in
 all_mechanisms = self.find('mechanism');
@@ -178,7 +197,7 @@ for i = 1:length(all_mechanisms)
 	% connect to synapse/conductance
 	idx = max(strfind(all_mechanisms{i},'.'));
 	cond_name = 'NULL';
-	syn_name = 'NULL'; 
+	syn_name = 'NULL';
 
 	parent_name = strrep(all_mechanisms{i}(1:idx-1),'.','_');
 	mechanism_name = strrep(all_mechanisms{i},'.','_');
@@ -190,8 +209,8 @@ end
 
 mechanism_add_lines{end+1} = ['int n_mechanisms = ' mat2str(length(all_mechanisms)) ';'];
 
-insert_here = lineFind(lines,'//xolotl:add_mechanisms_here');
-assert(length(insert_here)==1,'Could not find insertion point for mechanism hookups');
+insert_here = filelib.find(lines,'//xolotl:add_mechanisms_here');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for mechanism hookups');
 lines = [lines(1:insert_here); mechanism_add_lines(:); lines(insert_here+1:end)];
 
 
@@ -204,8 +223,8 @@ for i = 1:length(compartment_names)
 	network_add_lines{i} = ['xolotl_network.addCompartment(&' compartment_names{i} ');'];
 end
 
-insert_here = lineFind(lines,'//xolotl:add_neurons_to_network');
-assert(length(insert_here)==1,'Could not find insertion point for cell->network hookup')
+insert_here = filelib.find(lines,'//xolotl:add_neurons_to_network');
+corelib.assert(length(insert_here)==1,'Could not find insertion point for cell->network hookup')
 lines = [lines(1:insert_here); network_add_lines(:); lines(insert_here+1:end)];
 
 
@@ -220,5 +239,5 @@ if ispc
 	end
 end
 
-mexBridge_name = joinPath(self.xolotl_folder, out_file);
-lineWrite(mexBridge_name,lines);
+mexBridge_name = pathlib.join(self.xolotl_folder, out_file);
+filelib.write(mexBridge_name,lines);

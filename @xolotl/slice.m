@@ -1,52 +1,52 @@
-%{
-              _       _   _ 
-   __  _____ | | ___ | |_| |
-   \ \/ / _ \| |/ _ \| __| |
-    >  < (_) | | (_) | |_| |
-   /_/\_\___/|_|\___/ \__|_|
 
-### slice
+%               _       _   _ 
+%    __  _____ | | ___ | |_| |
+%    \ \/ / _ \| |/ _ \| __| |
+%     >  < (_) | | (_) | |_| |
+%    /_/\_\___/|_|\___/ \__|_|
+%
+% ### slice
+%
+% **Syntax**
+%
+% ```matlab
+% % assuming there is a compartment called 'Dendrite'
+% x.slice('Dendrite',10)
+% ```
+%
+% **Description**
+%
+% `slice` partitions a cylindrical compartment into N slices.
+%
+% The compartment to be sliced must explicitly be a cylindrical
+% section, i.e., it must have a defined length and radius.
+% `slice` cuts the cylinder along the axis, and connects each
+% slice with `Axial` synapses. This object can then be treated
+% as a multi-compartment model, and `xolotl` will integrate
+% it using the Crank-Nicholson scheme reserved for multi-compartment models.
+%
+%
+% See Also: 
+% xolotl.connect
 
-**Syntax**
 
-```matlab
-% assuming there is a compartment called 'Dendrite'
-x.slice('Dendrite',10)
-```
-
-**Description**
-
-`slice` partitions a cylindrical compartment into N slices.  
-
-The compartment to be sliced must explicitly be a cylindrical 
-section, i.e., it must have a defined length and radius. 
-`slice` cuts the cylinder along the axis, and connects each 
-slice with `Axial` synapses. This object can then be treated 
-as a multi-compartment model, and `xolotl` will integrate 
-it using the Crank-Nicholson scheme reserved for multi-compartment models. 
-
-
-!!! info "See Also"
-    ->xolotl.connect
-
-%}
 
 function slice(self, compartment, N_slices, axial_resistivity)
 
-assert(any(strcmp(self.find('compartment'),compartment)),'Unknown compartment')
+corelib.assert(any(strcmp(self.find('compartment'),compartment)),'Unknown compartment')
 
 
-assert(~any(N_slices - floor(N_slices)),'N_slices must be an integer > 1')
-assert(isscalar(N_slices),'N_slices must be an integer > 1')
-assert(N_slices > 1,'N_slices must be an integer > 1')
+corelib.assert(~any(N_slices - floor(N_slices)),'N_slices must be an integer > 1')
+corelib.assert(isscalar(N_slices),'N_slices must be an integer > 1')
+corelib.assert(N_slices > 1,'N_slices must be an integer > 1')
 
 if nargin < 4
 	axial_resistivity = NaN;
 end
 
-assert(isscalar(axial_resistivity),'axial_resistivity must be a real +ve number')
+corelib.assert(isscalar(axial_resistivity),'axial_resistivity must be a real +ve number')
 if ~isnan(axial_resistivity)
-	assert(axial_resistivity > 0,'axial_resistivity must be a real +ve number')
+	corelib.assert(axial_resistivity > 0,'axial_resistivity must be a real +ve number')
 end
 
 if iscell(compartment)
@@ -67,13 +67,11 @@ end
 
 % we assume cylindrical geometry
 % so make sure that the radius and length
-% fields are filled out 
+% fields are filled out
 
-assert(~isnan(self.(compartment).radius),'Radius of compartment must be specified')
-assert(~isnan(self.(compartment).len),'Length of compartment must be specified')
+corelib.assert(~isnan(self.(compartment).radius),'Radius of compartment must be specified')
+corelib.assert(~isnan(self.(compartment).len),'Length of compartment must be specified')
 
-skip_hash_state = self.skip_hash;
-self.skip_hash = true;
 
 new_len = self.(compartment).len/N_slices;
 
@@ -94,7 +92,7 @@ all_comps = {};
 
 
 for i = 1:N_slices
-	
+
 	padding_length = n_digits - length(mat2str(i));
 	new_comp_name = [compartment_root_name repmat('0',1,padding_length) mat2str(i)];
 

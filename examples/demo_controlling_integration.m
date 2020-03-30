@@ -3,7 +3,7 @@
 % integration and request different forms of output
 % and how this can impact memory use
 
-x = xolotl.examples.BurstingNeuron;
+x = xolotl.examples.neurons.BurstingNeuron('prefix','liu');
 
 g0 = 1e-1+1e-1*rand(8,1);
 x.set('*gbar',g0);
@@ -35,15 +35,17 @@ temp = whos('V','Ca');
 memory_usage(1) = sum([temp.bytes]);
 
 
+spiketimes = xtools.findNSpikeTimes(V,xtools.findNSpikes(V));
+
 figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
 subplot(2,3,1)
-mtools.neuro.raster(xtools.findNSpikeTimes(V,xtools.findNSpikes(V)),'Color','k')
+neurolib.raster(spiketimes(1:100),'center',false,'Color','k')
 set(gca,'XLim',[0 10],'YTick',[])
 drawnow
 
 
 subplot(2,3,2)
-mtools.neuro.raster(xtools.findNSpikeTimes(V,xtools.findNSpikes(V)),'Color','k')
+neurolib.raster(spiketimes(end-100:end),'center',false,'Color','k')
 set(gca,'XLim',[1e3-1 1e3],'YTick',[])
 
 % now use C++ spike finding
@@ -55,12 +57,12 @@ temp = whos('data');
 memory_usage(2) = temp.bytes;
 
 subplot(2,3,4)
-mtools.neuro.raster(data.AB.spiketimes,'Color','r')
+neurolib.raster(data.AB.spiketimes,'center',false,'Color','r')
 set(gca,'XLim',[0 10],'YTick',[])
 xlabel('Time (s)')
 
 subplot(2,3,5)
-mtools.neuro.raster(data.AB.spiketimes,'Color','r')
+neurolib.raster(data.AB.spiketimes,'center',false,'Color','r')
 set(gca,'XLim',[1e3-1 1e3],'YTick',[])
 xlabel('Time (s)')
 
@@ -70,3 +72,5 @@ b = bar(2,memory_usage(2),'FaceColor','r');
 set(gca,'YScale','log','XTick',[1 2],'XLim',[0 3],'XTickLabel',{'Normal mode','spikes detected in C++'},'YLim',[1e7 1e9],'XTickLabelRotation',45)
 ylabel('Memory used (bytes)')
 drawnow
+
+figlib.pretty('FontSize',12)

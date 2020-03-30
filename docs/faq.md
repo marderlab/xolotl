@@ -37,12 +37,14 @@ try the following
 xolotl.cleanup
 
 % rebuilds the cache of C++ objects
-cpplab.rebuildCache()
+cpplab.rebuildCache
 ```
 
 If you're still having a problem, we might have fixed it already! Reinstall or update by running the `xolotl.update()` if you installed the toolbox or pulling from the repository if you're using `git`.
 Remember that if you're using `git` you should be sure to pull all the dependencies as well
 (`srinivas.gs_mtools`, `cpplab`, `puppeteer`).
+
+You can also check our [troubleshooting](troubleshooting.md) page for known fixes to common problems.
 
 
 ## How do I cite this?

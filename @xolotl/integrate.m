@@ -1,63 +1,64 @@
-%{
-              _       _   _ 
-   __  _____ | | ___ | |_| |
-   \ \/ / _ \| |/ _ \| __| |
-    >  < (_) | | (_) | |_| |
-   /_/\_\___/|_|\___/ \__|_|
 
-### integrate
+%               _       _   _ 
+%    __  _____ | | ___ | |_| |
+%    \ \/ / _ \| |/ _ \| __| |
+%     >  < (_) | | (_) | |_| |
+%    /_/\_\___/|_|\___/ \__|_|
+%
+% ### integrate
+%
+% integrates a `xolotl` model.
+%
+% **Syntax**
+%
+% ```matlab
+% x.output_type = 0;
+% V = x.integrate;
+% I_clamp = x.integrate;
+% [V, Ca] = x.integrate;
+% [V, Ca, mech_state] = x.integrate;
+% [V, Ca, mech_state, I] = x.integrate;
+% [V, Ca, mech_state, I, syn_state] = x.integrate;
+%
+% x.output_type = 1;
+% results = x.integrate;
+%
+% x.output_type = 2;
+% results_and_spiketimes = x.integrate;
+% ```
+%
+% **Description**
+%
+% The outputs of integrate depend on the `output_type` property of `xolotl`.
+%
+% | `output_type` value | outputs of `x.integrate` |
+% | ------------------- | ------------------------ |
+% | 0 (default) | up to 5 matrices of type double |
+% | 1 | only one output, a structure |
+% | 2 | only one output, a structure |
+%
+%
+% **Explanation of outputs**
+%
+% When `output_type` is 0,
+%
+% - `V` Voltage trace of every compartment. A matrix of size (nsteps, n_comps)
+% - `I_clamp` also returned in the first argument, this is the clamping current when a compartment is being voltage clamped. This can be inter-leaved with the voltage of other, non-clamped compartments.
+% - `Ca` Calcium concentration in every cell and the corresponding `E_Ca` (reversal potential of Calcium). A matrix of size (nsteps, n_comps)
+% - `mech_state` a matrix representing every dimension of every mechanism in the tree. This matrix has size (nsteps, NC), where NC depends on the precise controllers used, and is automatically determined.
+% - `I` the currents of every ion channel type in the model. This is a matrix of size (nsteps, n_cond)
+%
+% When `output_type` is 1 or 2, the integration is performed requesting all outputs, and these outputs are organized in a structure and named to match the names of the components in the model.
+%
+%
+% See Also: 
+% xolotl.show
+% xolotl.plot
+% xolotl.transpile
+% xolotl.compile
+ 
 
-integrates a `xolotl` model. 
 
-**Syntax**
-
-```matlab
-x.output_type = 0;
-V = x.integrate;
-I_clamp = x.integrate;
-[V, Ca] = x.integrate;
-[V, Ca, mech_state] = x.integrate;
-[V, Ca, mech_state, I] = x.integrate;
-[V, Ca, mech_state, I, syn_state] = x.integrate;
-
-x.output_type = 1;
-results = x.integrate;
-
-x.output_type = 2;
-results_and_spiketimes = x.integrate;
-```
-
-**Description**
-
-The outputs of integrate depend on the `output_type` property of `xolotl`.
-
-| `output_type` value | outputs of `x.integrate` |
-| ------------------- | ------------------------ |
-| 0 (default) | up to 5 matrices of type double | 
-| 1 | only one output, a structure |
-| 2 | only one output, a structure | 
-
-
-**Explanation of outputs**
-
-When `output_type` is 0, 
-
-- `V` Voltage trace of every compartment. A matrix of size (nsteps, n_comps)
-- `I_clamp` also returned in the first argument, this is the clamping current when a compartment is being voltage clamped. This can be inter-leaved with the voltage of other, non-clamped compartments. 
-- `Ca` Calcium concentration in every cell and the corresponding `E_Ca` (reversal potential of Calcium). A matrix of size (nsteps, n_comps)
-- `mech_state` a matrix representing every dimension of every mechanism in the tree. This matrix has size (nsteps, NC), where NC depends on the precise controllers used, and is automatically determined. 
-- `I` the currents of every ion channel type in the model. This is a matrix of size (nsteps, n_cond)
-
-When `output_type` is 1 or 2, the integration is performed requesting all outputs, and these outputs are organized in a structure and named to match the names of the components in the model. 
-
-!!! info "See Also"
-    ->xolotl.show
-    ->xolotl.plot
-    ->xolotl.transpile
-    ->xolotl.compile
-
-
-%}
 
 
 function varargout = integrate(self)
@@ -65,32 +66,42 @@ function varargout = integrate(self)
 
 if isempty(self.linked_binary)
 	if self.verbosity > 0
-		disp(['[INFO] No linked binary, hashing...'])
+		disp('[INFO] No linked binary, hashing...')
 	end
 	h = self.hash;
-	mexBridge_name = [joinPath(self.xolotl_folder,'X_') h '.cpp'];
 	self.linked_binary = ['X_' h '.' mexext];
 end
 
 
 % does the binary exist?
-if exist(joinPath(self.xolotl_folder,self.linked_binary),'file') == 3
+if exist(pathlib.join(self.xolotl_folder,self.linked_binary),'file') == 3
 	% does the hash match up?
 
 	if self.verbosity > 0
-		disp(['[INFO] Binary exists.'])
+		disp('[INFO] Binary exists.')
 	end
 
 	h = self.hash;
 	if ~strcmp(self.linked_binary(3:34),h)
 
 		if self.verbosity > 0
-			disp(['[INFO] Binary out of sync'])
+			disp('[INFO] Binary out of sync')
 			disp(['[INFO] Current hash is ' h])
 		end
 
-		self.transpile;
-		self.compile;
+		% maybe the binary exists?
+		if exist(pathlib.join(self.xolotl_folder,['X_' h '.' mexext]),'file') == 3
+			% binary exists. just update the linked_binary and we should be good
+			if self.verbosity > 0
+				disp('[INFO] Bianry exists, no need to recompile.')
+			end
+			self.linked_binary = ['X_' h '.' mexext];
+		else
+			% no, need to compile
+
+			self.transpile;
+			self.compile;
+		end
 	end
 
 else
@@ -103,21 +114,32 @@ if isnan(self.sim_dt) || isempty(self.sim_dt)
 	self.sim_dt = self.dt;
 end
 
-% check that the simulation doesn't exceed C++ intmax
-assert(self.t_end/self.sim_dt<intmax,'Simulation is too long. The number of steps required exceeds INT_MAX')
+corelib.assert(self.t_end > 1,'t_end too short')
+corelib.assert(self.sim_dt > 0,'sim_dt must be positive')
+corelib.assert(self.dt > 0,'dt must be positive')
 
-assert(rem(self.dt,self.sim_dt)==0,'Simulation & output dt are not compatible')
+% check that the simulation doesn't exceed C++ intmax
+corelib.assert(self.t_end/self.sim_dt<intmax,'Simulation is too long. The number of steps required exceeds INT_MAX')
+
+if self.dt < self.sim_dt
+	self.dt = self.sim_dt;
+end
+
+corelib.assert(rem(self.dt,self.sim_dt)==0,'Simulation & output dt are not compatible')
 
 if nargout == 0 & self.closed_loop == false
 	error('Are you sure you want to integrate this with no outputs and with closed_loop set to FALSE?')
 end
 
-if self.output_type == 1
+
+if self.output_type == 0
+	n_outputs = nargout;
+elseif self.output_type == 1
 	n_outputs = 5; % we get everything
 elseif self.output_type == 2
 	n_outputs = 6; % everything + spiketimes
 else
-	n_outputs = nargout;
+	error('output_type should be either 0, 1 or 2')
 end
 
 V = [];
@@ -226,7 +248,7 @@ for i = 1:n_comp
 end
 
 
-% all mechanisms 
+% all mechanisms
 all_mechanisms = self.find('mechanism');
 a = 1;
 for i = 1:length(mechanism_sizes)
@@ -237,11 +259,8 @@ for i = 1:length(mechanism_sizes)
 	end
 
 	z = a + this_mech_size - 1;
-
-	eval(['data.' all_mechanisms{i} '=cont_state(:,a:z);']);
-
+	data = structlib.write(data, all_mechanisms{i}, cont_state(:,a:z));
 	a = z + 1;
-
 end
 
 
@@ -262,6 +281,4 @@ if ~isempty(syn_state )
 end
 
 varargout{1} = data;
-return
-
 

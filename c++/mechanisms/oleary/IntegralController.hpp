@@ -1,10 +1,9 @@
-// _  _ ____ _    ____ ___ _    
-//  \/  |  | |    |  |  |  |    
-// _/\_ |__| |___ |__|  |  |___ 
+// _  _ ____ _    ____ ___ _
+//  \/  |  | |    |  |  |  |
+// _/\_ |__| |___ |__|  |  |___
 //
-// Integral controller, as in O'Leary et al 
-// This controller can control either a synapse
-// or a conductance 
+// component source [O'Leary et al. 2014](https://www.sciencedirect.com/science/article/pii/S089662731400292X)
+// component info: Integral controller of conductances and synapses
 
 #ifndef INTEGRALCONTROLLER
 #define INTEGRALCONTROLLER
@@ -25,18 +24,17 @@ protected:
 public:
     // timescales
     double tau_m = std::numeric_limits<double>::infinity();
-    double tau_g = 5e3; 
+    double tau_g = 5e3;
 
-    // mRNA concentration 
+    // mRNA concentration
     double m = 0;
 
     // area of the container this is in
     double container_A;
 
-    // specify parameters + initial conditions for 
-    // mechanism that controls a conductance 
-    IntegralController(double tau_m_, double tau_g_, double m_)
-    {
+    // specify parameters + initial conditions for
+    // mechanism that controls a conductance
+    IntegralController(double tau_m_, double tau_g_, double m_) {
 
         tau_m = tau_m_;
         tau_g = tau_g_;
@@ -47,7 +45,7 @@ public:
         if (tau_g<=0) {mexErrMsgTxt("[IntegralController] tau_g must be > 0. Perhaps you meant to set it to Inf?\n");}
     }
 
-    
+
     void integrate(void);
 
     void checkSolvers(int);
@@ -59,8 +57,13 @@ public:
     int getFullStateSize(void);
     int getFullState(double * cont_state, int idx);
     double getState(int);
+    string getClass(void);
 
 };
+
+string IntegralController::getClass() {
+    return "IntegralController";
+}
 
 
 double IntegralController::getState(int idx)
@@ -75,8 +78,7 @@ double IntegralController::getState(int idx)
 int IntegralController::getFullStateSize(){return 2; }
 
 
-int IntegralController::getFullState(double *cont_state, int idx)
-{
+int IntegralController::getFullState(double *cont_state, int idx) {
     // give it the current mRNA level
     cont_state[idx] = m;
 
@@ -86,19 +88,18 @@ int IntegralController::getFullState(double *cont_state, int idx)
     // being controller
     if (channel)
     {
-      cont_state[idx] = channel->gbar;  
+      cont_state[idx] = channel->gbar;
     }
     else if (syn)
     {
-        cont_state[idx] = syn->gmax;  
+        cont_state[idx] = syn->gmax;
     }
     idx++;
     return idx;
 }
 
 
-void IntegralController::connect(conductance * channel_)
-{
+void IntegralController::connect(conductance * channel_) {
 
     // connect to a channel
     channel = channel_;
@@ -112,7 +113,7 @@ void IntegralController::connect(conductance * channel_)
     controlling_class = (channel_->getClass()).c_str();
 
     // attempt to read the area of the container that this
-    // controller should be in. 
+    // controller should be in.
     container_A  = (channel->container)->A;
 
     control_type = 1;
@@ -120,13 +121,11 @@ void IntegralController::connect(conductance * channel_)
 
 }
 
-void IntegralController::connect(compartment* comp_)
-{
+void IntegralController::connect(compartment* comp_) {
     mexErrMsgTxt("[IntegralController] This mechanism cannot connect to a compartment object");
 }
 
-void IntegralController::connect(synapse* syn_)
-{
+void IntegralController::connect(synapse* syn_) {
 
     // connect to a synpase
     syn = syn_;
@@ -137,7 +136,7 @@ void IntegralController::connect(synapse* syn_)
 
 
     // attempt to read the area of the container that this
-    // controller should be in. 
+    // controller should be in.
     container_A  = (syn->post_syn)->A;
 
     control_type = 2;
@@ -145,12 +144,10 @@ void IntegralController::connect(synapse* syn_)
 }
 
 
-void IntegralController::integrate(void)
-{
+void IntegralController::integrate(void) {
 
 
-    switch (control_type)
-    {
+    switch (control_type) {
         case 0:
             mexErrMsgTxt("[IntegralController] misconfigured controller. Make sure this object is contained by a conductance or synapse object");
             break;
@@ -160,8 +157,8 @@ void IntegralController::integrate(void)
 
             {
             // if the target is NaN, we will interpret this
-            // as the controller being disabled 
-            // and do nothing 
+            // as the controller being disabled
+            // and do nothing
             if (isnan((channel->container)->Ca_target)) {return;}
 
             double Ca_error = (channel->container)->Ca_target - (channel->container)->Ca_prev;
@@ -176,10 +173,10 @@ void IntegralController::integrate(void)
             double gdot = ((dt/tau_g)*(m - channel->gbar*container_A));
 
             // make sure it doesn't go below zero
-            if (channel->gbar_next + gdot < 0) {
-                channel->gbar_next = 0;
+            if (channel->gbar + gdot/container_A < 0) {
+                channel->gbar = 0;
             } else {
-                channel->gbar_next += gdot/container_A;
+                channel->gbar += gdot/container_A;
             }
 
 
@@ -189,8 +186,8 @@ void IntegralController::integrate(void)
         case 2:
             {
             // if the target is NaN, we will interpret this
-            // as the controller being disabled 
-            // and do nothing 
+            // as the controller being disabled
+            // and do nothing
 
             if (isnan((syn->post_syn)->Ca_target)) {return;}
 
@@ -228,8 +225,7 @@ void IntegralController::integrate(void)
 
 
 
-void IntegralController::checkSolvers(int k)
-{
+void IntegralController::checkSolvers(int k) {
     if (k == 0){
         return;
     } else {

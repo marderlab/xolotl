@@ -2,9 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// H current. again, for mysterious reasons, the compiler
-// won't let me call this class "H"
-// http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf
+// component info: H Current (hyperpolarization activated current)
+// component source [Liu et al. 98](http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf)
+//
 #ifndef HCURRENT
 #define HCURRENT
 #include "conductance.hpp"
@@ -15,15 +15,14 @@ class HCurrent: public conductance {
 public:
 
     //specify both gbar and erev and initial conditions
-    HCurrent(double g_, double E_, double m_)
+    HCurrent(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
         if (isnan (E)) { E = -20; }
 
         p = 1;

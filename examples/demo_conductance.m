@@ -3,22 +3,8 @@
 % custom conductances using the conductance class
 % and compare that the two neurons are identical
 
-x = xolotl.examples.BurstingNeuron;
+x = xolotl.examples.neurons.BurstingNeuron('prefix','liu');
 
-% A = 0.0628; % this can be anything, doesn't matter
-
-% x = xolotl;
-% x.add('compartment','AB','A',A);
-% x.AB.add('prinz/CalciumMech','f',1.496);
-
-% x.AB.add('liu/NaV','gbar',@() 115/x.AB.A,'E',30);
-% x.AB.add('liu/CaT','gbar',@() 1.44/x.AB.A,'E',30);
-% x.AB.add('liu/CaS','gbar',@() 1.7/x.AB.A,'E',30);
-% x.AB.add('liu/ACurrent','gbar',@() 15.45/x.AB.A,'E',-80);
-% x.AB.add('liu/KCa','gbar',@() 61.54/x.AB.A,'E',-80);
-% x.AB.add('liu/Kd','gbar',@() 38.31/x.AB.A,'E',-80);
-% x.AB.add('liu/HCurrent','gbar',@() .6343/x.AB.A,'E',-20);
-% x.AB.add('Leak','gbar',@() 0.0622/x.AB.A,'E',-50);
 
 
 channels = x.AB.find('conductance');
@@ -72,11 +58,13 @@ x2.AB.add('Leak','gbar',@() 0.0622/x.AB.A,'E',-50);
 x.sim_dt = .1;
 x.dt = .1;
 x.reset;
+x.approx_channels = 0;
 V = x.integrate;
 
 x2.t_end = x.t_end;
 x2.sim_dt = .1;
 x2.dt = .1;
+x2.approx_channels = 0;
 x2.reset;
 V2 = x2.integrate;
 
@@ -84,4 +72,6 @@ figure, hold on
 plot(V)
 plot(V2)
 
-assert(sum(V2 - V)==0,'Something went wrong')
+figlib.pretty()
+
+% corelib.assert(sum(V2 - V)==0,'Something went wrong')

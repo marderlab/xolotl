@@ -1,38 +1,38 @@
-%{
-              _       _   _ 
-   __  _____ | | ___ | |_| |
-   \ \/ / _ \| |/ _ \| __| |
-    >  < (_) | | (_) | |_| |
-   /_/\_\___/|_|\___/ \__|_|
 
-### compile
+%               _       _   _ 
+%    __  _____ | | ___ | |_| |
+%    \ \/ / _ \| |/ _ \| __| |
+%     >  < (_) | | (_) | |_| |
+%    /_/\_\___/|_|\___/ \__|_|
+%
+% ### compile
+%
+% **Syntax**
+%
+% ```matlab
+% x.compile
+% ```
+%
+% **Description**
+%
+% compiles a executable binary form a transpiled ``C++`` file.
+% These are stored in your ``xolotl`` directory. ``xolotl``
+% automatically compiles when t needs to. You can turn this
+% functionality off by setting
+%
+%
+% See Also: 
+% xolotl.transpile
+% xolotl.cleanup
 
-**Syntax**
 
-```matlab
-x.skip_hash = true;
-```
-
-**Description**
-
-compiles a executable binary form a transpiled ``C++`` file. 
-These are stored in your ``xolotl`` directory. ``xolotl`` 
-automatically compiles when t needs to. You can turn this 
-functionality off by setting
-
-
-!!! info "See Also"
-    ->xolotl.transpile
-    ->xolotl.cleanup
-
-%}
 
 function compile(self)
 
 h = self.hash;
 
-mexBridge_name = [joinPath(self.xolotl_folder,'X_') h '.cpp'];
-assert(exist(mexBridge_name,'file')==2,'C++ file to compile does not exist. Use "transpile" before compiling')
+mexBridge_name = [pathlib.join(self.xolotl_folder,'X_') h '.cpp'];
+corelib.assert(exist(mexBridge_name,'file')==2,'C++ file to compile does not exist. Use "transpile" before compiling')
 
 if self.verbosity > 0
 	disp(['[INFO] compiling using mex...'])

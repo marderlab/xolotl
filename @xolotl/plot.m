@@ -1,46 +1,56 @@
-%{
-              _       _   _ 
-   __  _____ | | ___ | |_| |
-   \ \/ / _ \| |/ _ \| __| |
-    >  < (_) | | (_) | |_| |
-   /_/\_\___/|_|\___/ \__|_|
+%
+% 				_       _   _
+%    __  _____ | | ___ | |_| |
+%    \ \/ / _ \| |/ _ \| __| |
+%     >  < (_) | | (_) | |_| |
+%    /_/\_\___/|_|\___/ \__|_|
+%
+% ### plot
+%
+% **Syntax**
+%
+% ```matlab
+% x.plot()
+% x.plot('comp_name')
+% x.plot({'comp1','comp2'...})
+% ```
+%
+% ** Description**
+%
+% - **`x.plot`**  makes a plot of voltage and calcium time series of all
+% compartments. The default option is to color the voltage
+% traces by the dominant current at that point using
+% `contributingCurrents` and to also show the Calcium
+% concentration on the same plot.
+% - **`x.plot('comp_name')`** Plots voltage traces from only that compartment.
+% - **`x.plot({'comp1','comp2'...}))`** plots voltage traces from these compartments.
+%
+%
+% If you want to turn off the coloring, or to hide the
+% Calcium concentration, change your preference using:
+%
+%
+% ```matlab
+% x.pref.plot_color = false;
+% x.pref.show_Ca = false;
+% ```
+%
+% See Also: 
+% xolotl.manipulate
+% xolotl.contributingCurrents
+% xolotl.currentscape
 
-### plot
-
-**Syntax**
-
-```matlab
-x.plot()
-```
-
-** Description**
-
-`x.plot` makes a plot of voltage and calcium time series of all 
-compartments. The default option is to color the voltage
-traces by the dominant current at that point using  
-`contributingCurrents` and to also show the Calcium 
-concentration on the same plot. 
 
 
-If you want to turn off the coloring, or to hide the 
-Calcium concentration, change your preference using:
+function plot(self, comp_names)
 
 
-```matlab
-x.pref.plot_color = false;
-x.pref.show_Ca = false;
-```
+if nargin == 1
+	comp_names = self.find('compartment');
+elseif ~iscell(comp_names)
+	comp_names = {comp_names};
+end
 
-!!! info "See Also"
-    ->xolotl.manipulate
-    ->xolotl.contributingCurrents
-
-%}
-
-
-function plot(self, ~)
-
-comp_names = self.find('compartment');
 N = length(comp_names);
 c = lines(100);
 
@@ -57,21 +67,24 @@ if isempty(self.handles) || ~isfield(self.handles,'fig') || ~isvalid(self.handle
 
 	for i = 1:N
 		self.handles.ax(i) = subplot(N,1,i); hold on
+		self.handles.ax(i).YLim = [-80 50];
 	end
 
+	warning('off')
 	try
 		linkaxes(self.handles.ax,'x');
 	catch
 	end
+	warning('on')
 
 	% make all dummy plots
-	
+
 	for i = 1:N
 
 		if self.pref.show_Ca
 			yyaxis(self.handles.ax(i),'left')
 		end
-		
+
 		cond_names = self.(comp_names{i}).find('conductance');
 
 		if self.pref.plot_color
@@ -91,7 +104,7 @@ if isempty(self.handles) || ~isfield(self.handles,'fig') || ~isvalid(self.handle
 		end
 
 		% make calcium dummy plots
-		
+
 		if self.pref.show_Ca
 			yyaxis(self.handles.ax(i),'right')
 			self.handles.Ca_trace(i) = plot(self.handles.ax(i),NaN,NaN,'Color','k');
@@ -112,7 +125,7 @@ if isempty(self.handles) || ~isfield(self.handles,'fig') || ~isvalid(self.handle
 
 		set(self.handles.ax(1),'XLim',[0 max(self.t_end*1e-3)]);
 
-		% attach this figure to the puppeteer instance 
+		% attach this figure to the puppeteer instance
 		try
 			self.handles.puppeteer_object.attachFigure(self.handles.fig);
 		catch
@@ -131,18 +144,23 @@ max_Ca = max(max(Ca(:,1:N)));
 
 time = 1e-3 * self.dt * (1:size(V,1));
 
+
 a = 1;
 for i = 1:N
 	cond_names = self.(comp_names{i}).find('conductance');
-	this_V = V(:,i);
+	this_V = V(:,find(strcmp(comp_names{i},self.Children)));
 	z = a + length(cond_names) - 1;
 	this_I = currents(:,a:z);
 	a = z + 1;
 
-	curr_index = xolotl.contributingCurrents(this_V, this_I);
+	
 
 	% show voltage
 	if self.pref.plot_color
+
+
+		curr_index = xolotl.contributingCurrents(this_V, this_I);
+		
 		for j = 1:size(this_I,2)
 			Vplot = this_V;
 			Vplot(curr_index ~= j) = NaN;
@@ -179,7 +197,7 @@ if strcmp(self.handles.ax(1).XLimMode,'auto')
 end
 
 try
-	prettyFig('plw',1,'lw',1);
+	figlib.pretty('PlotLineWidth',1,'LineWidth',1);
 catch
 end
 

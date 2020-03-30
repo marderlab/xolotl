@@ -2,8 +2,8 @@ site_name: xolotl
 repo_url: https://github.com/sg-s/xolotl/
 site_author: Srinivas Gorur-Shandilya
 docs_dir: 'docs'
-theme: 
-  name: 'material' 
+theme:
+  name: 'material'
   logo: 'images/Xlogo.png'
   palette:
     primary: 'deep-purple'
@@ -15,7 +15,8 @@ pages:
     - Demos: 'tutorials/built-in-demos.md'
     - Your first neuron: 'tutorials/first-neuron.md'
     - Your first network: 'tutorials/first-network.md'
-  - How to: 
+    - Your first xgrid: tutorials/first-xgrid.md
+  - How to:
     - Install and configure: how-to/install-configure.md
     - Construct models: how-to/construct-models.md
     - Discover existing components: how-to/discover-components.md
@@ -31,20 +32,25 @@ pages:
     - Make your own components: how-to/make-own-models.md
     - Manipulate a model: how-to/manipulate.md
     - Create multi-compartment models: how-to/create-multi-compartment-models.md
-  - Reference: 
+    - Fit a model to arbitrary constraints: how-to/fit-parameters.md
+    - Run simulations in parallel: how-to/run-simulations-in-parallel.md
+    - Use stochastic channels: how-to/stochastic-channels.md
+  - Reference:
     - Units: 'reference/units.md'
-    - C++ classes: 
+    - C++ classes:
       - conductance: 'reference/c++/conductance.md'
       - compartment: 'reference/c++/compartment.md'
       - synapse: 'reference/c++/synapse.md'
       - network: 'reference/c++/network.md'
       - mechanism: 'reference/c++/mechanism.md'
-    - MATLAB classes:
+    - MATLAB:
       - conductance: reference/matlab/conductance.md
       - xtools: reference/matlab/xtools.md
       - xtest: reference/matlab/xtest.md
       - xolotl: reference/matlab/xolotl.md
       - cpplab: reference/matlab/cpplab.md
+      - xfit: reference/matlab/xfit.md
+      - xgrid: reference/matlab/xgrid.md
   - How xolotl works:
     - How cpplab binds code: explanation/cpplab.md
     - How equations are integrated: explanation/integration.md
@@ -54,14 +60,15 @@ pages:
   - Performance tips:
     - Speed: 'performance/speed.md'
     - Memory: 'performance/memory.md'
-  - Troubleshooting: 
+  - Troubleshooting:
     - Fixes to common problems: troubleshooting.md
-  - Meta: 
+  - Meta:
     - Development and future: 'meta/future.md'
     - Documentation: 'meta/documentation.md'
     - Testing: 'meta/testing.md'
   - FAQ: 'faq.md'
   - Contributing: 'contributing.md'
+  - Bibliography: 'bibliography.md'
   - License: 'license.md'
 
 use_directory_urls: true
@@ -73,6 +80,6 @@ markdown_extensions:
   - toc:
       permalink: true
   - codehilite
-   
+
 # Required to load the MathJax javascript for the mdx_math.py
 extra_javascript: ['https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML']

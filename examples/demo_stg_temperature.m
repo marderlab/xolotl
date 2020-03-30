@@ -7,23 +7,9 @@
 
 
 
-x = xolotl;
-x.add('compartment','AB','A',0.0628);
+x = xolotl.examples.neurons.BurstingNeuron('prefix','prinz-temperature','CalciumMech','buchholtz-temperature');
 
-x.AB.add('prinz/CalciumMech');
-
-x.AB.add('prinz-temperature/NaV','gbar',1000);
-x.AB.add('prinz-temperature/CaT','gbar',25);
-x.AB.add('prinz-temperature/CaS','gbar',60);
-x.AB.add('prinz-temperature/ACurrent','gbar',500);
-x.AB.add('prinz-temperature/KCa','gbar',50);
-x.AB.add('prinz-temperature/Kd','gbar',1000);
-x.AB.add('prinz-temperature/HCurrent','gbar',.1);
-
-x.set('*Q_g',2)
-x.set('*Q_h',2)
-x.set('*Q_tau_m',2)
-x.set('*Q_tau_h',2)
+x.set('*Q',2 + randn(19,1)/10)
 
 x.dt = 50e-3;
 x.t_end = 5e3;
@@ -44,5 +30,6 @@ xlabel('Time (s)')
 ylabel('V_{m} (mV)')
 legend({'11C','22C'})
 set(gca,'XLim',[0 6],'YLim',[-80 50])
-prettyFig('plw',1,'lw',1)
+figlib.pretty('PlotLineWidth',1,'LineWidth',1)
 drawnow
+

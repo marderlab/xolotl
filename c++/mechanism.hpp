@@ -1,10 +1,10 @@
 /*
 
 This document describes the "mechanism" C++ class.
-This class describes objects that are mechanisms, and 
+This class describes objects that are mechanisms, and
 can be used to represent any sort of mechanism or dynamical
 system that affects compartments, conductances or synapses,
-or even other mechanisms. 
+or even other mechanisms.
 
 | Abstract | can contain | contained in |
 | --------  | ------ | -------  |
@@ -28,7 +28,7 @@ class synapse;
 class mechanism {
 protected:
     conductance* channel; // pointer to conductance that this regulates
-    synapse* syn; // pointer to synapse that this regulates 
+    synapse* syn; // pointer to synapse that this regulates
 
 
 public:
@@ -36,12 +36,12 @@ public:
     compartment * comp; // pointer to compartment that it is in
 
     // store the type of the thing being controlled
-    // as a string 
+    // as a string
     string controlling_class;
 
     int mechanism_idx;
 
-    // also store the parameters of the 
+    // also store the parameters of the
     // compartment that it is physically located in
     double container_A;
     double container_vol;
@@ -54,36 +54,38 @@ public:
 
     mechanism()
     {
-        // null pointers to all 
-        // connectors for safety 
-        channel = NULL; 
-        syn = NULL; 
+        // null pointers to all
+        // connectors for safety
+        channel = NULL;
+        syn = NULL;
         comp = NULL;
     }
-    
+
     ~mechanism() {}
-    
+
     virtual void integrate(void);
     virtual void integrateMS(int, double, double);
     virtual int getFullStateSize(void) = 0;
     virtual int getFullState(double*, int) = 0;
     virtual double getState(int) = 0;
+    virtual string getClass(void) = 0;
 
     virtual void checkSolvers(int) = 0;
 
     // connection methods
-    virtual void connect(compartment *) = 0;
-    virtual void connect(conductance *) = 0;
-    virtual void connect(synapse *) = 0;
+    virtual void connect(compartment *);
+    virtual void connect(conductance *);
+    virtual void connect(synapse *);
 
 
 };
 
 /*
-Since mechanisms can be just about anything, the abstract
-mechanism class only implements two methods. 
-This method is used to integrate the mechanism under default 
-conditions (single-step integration). 
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "integrate"
+method, which will be used instead of this.
 */
 void mechanism::integrate() {
     mexErrMsgTxt("[mechanism] Unimplemented integration method\n");
@@ -91,14 +93,50 @@ void mechanism::integrate() {
 
 
 /*
-Since mechanisms can be just about anything, the abstract
-mechanism class only implements two methods. 
-This method is used to integrate the mechanism when a multi-step
-solver is requested. 
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+*/
+void mechanism::connect(compartment* comp_) {
+    mexErrMsgTxt("[mechanism] This mechanism cannot connect to a compartment object");
+}
+
+/*
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+*/
+void mechanism::connect(conductance* cond_) {
+    mexErrMsgTxt("[mechanism] This mechanism cannot connect to a conductance object");
+}
+
+/*
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+*/
+void mechanism::connect(synapse* syn_) {
+    mexErrMsgTxt("[mechanism] This mechanism cannot connect to a synapse object");
+}
+
+
+
+/*
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "integrateMS"
+method, which will be used instead of this.
 */
 void mechanism::integrateMS(int k, double V, double Ca) {
     mexErrMsgTxt("[mechanism] Unimplemented multi-step integration method\n");
-}   
+}
 
 
 

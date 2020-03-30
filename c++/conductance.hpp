@@ -89,17 +89,23 @@ broadcast to all components from `xolotl.verbosity`.
 #define CONDUCTANCE
 #include <cmath>
 #include <string>
-// #include "mechanism.hpp"
+#include <random>
 using std::string;
 class compartment;
 
 class conductance {
 protected:
     int V_idx = 0;
+
+    // these integer flags check to see if 
+    // tau_m or tau_h are 0, and if so, 
+    // m and h are set to their ss values
+    int instantaneous_m = 0;
+    int instantaneous_h = 0;
+
 public:
     compartment *container; // pointer to compartment that contains this
     double gbar;
-    double gbar_next;
     double g;
     double E = 0;
     double m = 0;
@@ -118,32 +124,39 @@ public:
     double temperature_ref = 11;
 
 
+    // how many channels are we modelling?
+    double unitary_conductance = 20e-6; // uS
+    int N = 1;
+
     // switches to tell xolotl
     // if channel supports approximation 
     // for performance speedup 
     int approx_m = 0;
     int approx_h  = 0;
 
-    double m_inf_cache[200];
-    double h_inf_cache[200];
-    double tau_m_cache[200];
-    double tau_h_cache[200];
+    double m_inf_cache[2000];
+    double h_inf_cache[2000];
+    double tau_m_cache[2000];
+    double tau_h_cache[2000];
+
+    // is this a calcium channel? 
+    bool is_calcium = false;
 
 
-
-    conductance()
-    {
-        container = 0; //null pointer for safety
+    // default constructor
+    conductance() {
+        container = nullptr; //null pointer for safety
     }
 
     ~conductance() {}
 
     virtual void integrate(double, double);
     virtual void integrateMS(int, double, double);
+    virtual void integrateLangevin(double, double);
 
     virtual void connect(compartment*); 
     virtual string getClass(void) = 0;
-    double getCurrent(double);
+    virtual double getCurrent(double);
     void checkSolvers(int);
 
     double mdot(double, double, double);
@@ -160,9 +173,15 @@ public:
     void buildLUT(double);
 
 
+    // fast random number generator
+    static double gaussrand(void);
+
+
     // housekeeping, temp variables
     double minf = 0;
     double hinf = 1;
+    double taum = 1;
+    double tauh = 1;
 
 };
 
@@ -186,14 +205,19 @@ void conductance::buildLUT(double approx_channels) {
         return;
     }
 
+    double V = 0;
+
     if (approx_m == 1) {
         if (verbosity > 0) {
             mexPrintf("%s using approximate activation functions\n", getClass().c_str());  
         }
         
-        for (double V = -99; V < 101; V++) {
-            m_inf_cache[(int) round(V+99)] = m_inf(V,0);
-            tau_m_cache[(int) round(V+99)] = tau_m(V,0);
+
+
+        for (int V_int = -999; V_int < 1001; V_int++) {
+            V = ((double) V_int)/10;
+            m_inf_cache[V_int+999] = m_inf(V,0);
+            tau_m_cache[V_int+999] = tau_m(V,0);
         }
     }
 
@@ -202,76 +226,15 @@ void conductance::buildLUT(double approx_channels) {
            mexPrintf("%s using approximate in-activation functions\n", getClass().c_str()); 
         }
         
-        for (double V = -99; V < 101; V++) {
-            h_inf_cache[(int) round(V+99)] = h_inf(V,0);
-            tau_h_cache[(int) round(V+99)] = tau_h(V,0);
+        for (int V_int = -999; V_int < 1001; V_int++) {
+            V = ((double) V_int)/10;
+            h_inf_cache[V_int+999] = h_inf(V,0);
+            tau_h_cache[V_int+999] = tau_h(V,0);
         }
     }
 } // buildLUT
 
 
-/*
-This method integrates the conductance object using
-the exponential Euler method. This is the default
-integration method used by xolotl. If an exact solution
-is to be calculated (i.e.,`approx_m = 0` and `approx_h=0`)
-then `m` and `h` are updated using the exponential Euler
-equation using function evaluations of the activation 
-functions at this voltage and Calcium.
-
-Otherwise, the lookup table is used to update `m` and `h`
-in this channel. 
-
-Note that this method is defined as virtual, so it can be
-overridden by integration methods specified in a specific
-conductance. 
-
-**See Also** 
-
-* [virtual methods in C++](http://www.cplusplus.com/doc/tutorial/polymorphism/)
-*/
-void conductance::integrate(double V, double Ca) {   
-
-
-    V_idx = (int) round(V+99);
-    if (V_idx < 0) {V_idx = 0;};
-    if (V_idx > 200) {V_idx = 200;};
-
-    // assume that p > 0
-    switch (approx_m) {
-        case 0:
-            minf = m_inf(V,Ca);
-            m = minf + (m - minf)*exp(-dt/tau_m(V,Ca));
-            break;
-
-        default:
-            m = m_inf_cache[V_idx] + (m - m_inf_cache[V_idx])*fast_exp(-(dt/tau_m_cache[V_idx]));
-            break;
-    } // switch approx_m
-    
-    g = gbar*fast_pow(m,p);
-
-    switch (q) {
-        case 0:
-            break;
-        default:
-            switch (approx_h) {
-                case 0:
-                    hinf = h_inf(V,Ca);
-                    h = hinf + (h - hinf)*exp(-dt/tau_h(V,Ca));
-                    break;
-                default:
-                    h = h_inf_cache[V_idx] + (h - h_inf_cache[V_idx])*fast_exp(-(dt/tau_h_cache[V_idx]));
-                    break;
-            }
-
-            g = g*fast_pow(h,q);            
-            break;
-    } // switch q
-
-    gbar = gbar_next;
-
-}
 
 
 /*
@@ -282,8 +245,7 @@ number is raised to be an integer (0-8)
 
 */
 inline double conductance::fast_pow(double x, int a) {
-    switch (a)
-    {
+    switch (a) {
         case 0:
             return 1;
             break;
@@ -328,86 +290,6 @@ inline double conductance::fast_exp(double x) {
 }
 
 
-/*
-
-This method integrates a channel object using a multi-step
-solver (MS = "multi-step"). The "sub-step" is indicated in 
-the integer k, which is the first input to this method. 
-
-The multi-step solver that is used here is a Runge-Kutta 4th
-order solver. Thus, k can have values up to 4. 
-
-Based on `k`, different elements of the arrays `k_m` and `k_h`
-are calculated and stored. At each step, the derivative functions
-`mdot` and `hdot` are computed. 
-
-**See Also**
-
-* [The Runge Kutta Method](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods)
-
-*/
-void conductance::integrateMS(int k, double V, double Ca) {
-
-    if (q == 0) {
-        // q= 0 means channel does not inactivate
-        switch (k)
-        {
-            case 0:
-                k_m[0] = dt*(mdot(V, Ca, m));
-                g = gbar*fast_pow(m,p);
-                break;
-            case 1:
-                k_m[1] = dt*(mdot(V, Ca, m + k_m[0]/2));
-                g = gbar*fast_pow(m + k_m[0]/2,p);
-                break;
-            case 2:
-                k_m[2] = dt*(mdot(V, Ca, m + k_m[1]/2));
-                g = gbar*fast_pow(m + k_m[1]/2,p);
-                break;
-            case 3:
-                k_m[3] = dt*(mdot(V, Ca, m + k_m[2]));
-                g = gbar*fast_pow(m + k_m[2],p);
-                break;
-            case 4:
-                // last step
-                m = m + (k_m[0] + 2*k_m[1] + 2*k_m[2] + k_m[3])/6;
-                break;
-        }
-            
-    } else {
-
-        switch (k)
-        {
-            case 0:
-                k_m[0] = dt*(mdot(V, Ca, m));
-                k_h[0] = dt*(hdot(V, Ca, h));
-                g = gbar*fast_pow(m,p)*fast_pow(h,q);
-                break;
-            case 1:
-                k_m[1] = dt*(mdot(V, Ca, m + k_m[0]/2));
-                k_h[1] = dt*(hdot(V, Ca, h + k_h[0]/2));
-                g = gbar*fast_pow(m + k_m[0]/2,p)*fast_pow(h + k_h[0]/2,q);
-                break;
-            case 2:
-                k_m[2] = dt*(mdot(V, Ca, m + k_m[1]/2));
-                k_h[2] = dt*(hdot(V, Ca, h + k_h[1]/2));
-                g = gbar*fast_pow(m + k_m[1]/2,p)*fast_pow(h + k_h[1]/2,q);
-                break;
-            case 3:
-                k_m[3] = dt*(mdot(V, Ca, m + k_m[2]));
-                k_h[3] = dt*(hdot(V, Ca, h + k_h[2]));
-                g = gbar*fast_pow(m + k_m[2],p)*fast_pow(h + k_h[2],q);
-                break;
-            case 4:
-                m = m + (k_m[0] + 2*k_m[1] + 2*k_m[2] + k_m[3])/6;
-                h = h + (k_h[0] + 2*k_h[1] + 2*k_h[2] + k_h[3])/6;
-                break;
-        }
-
-    }
-
-    gbar = gbar_next;
-}
 
 /*
 
@@ -417,15 +299,7 @@ this channel at this moment.
 */
 double conductance::getCurrent(double V) { return g * (V - E); }
 
-/*
-This method "connects" a conductance object to a compartment
-object. This sets the `container` property of the conductance,
-so the channel knows which compartment contains it. 
-*/
-void conductance::connect(compartment *pcomp_) {
-    container = pcomp_;
-    gbar_next = gbar;
-}
+
 
 /*
 */
@@ -485,5 +359,41 @@ This is a virtual method, and is meant to be defined in
 the channel object. 
 */
 double conductance::tau_h(double V, double Ca){return 1;}
+
+
+/*
+This method implements a very fast Gaussian random
+number generator. This is much faster than the 
+built-in generators in the C++ `<random>` header, and
+is copied from Knuth and Marsaglia.
+
+For the original source, see
+"A Convenient Method for Generating Normal Variables"
+SIAM Rev., 6(3), 260–264.
+*/
+double conductance::gaussrand() {
+    static double V1, V2, S;
+    static int phase = 0;
+    double X;
+
+    if(phase == 0) {
+        do {
+            double U1 = (double)rand() / RAND_MAX;
+            double U2 = (double)rand() / RAND_MAX;
+
+            V1 = 2 * U1 - 1;
+            V2 = 2 * U2 - 1;
+            S = V1 * V1 + V2 * V2;
+            } while(S >= 1 || S == 0);
+
+        X = V1 * sqrt(-2 * log(S) / S);
+    } else
+        X = V2 * sqrt(-2 * log(S) / S);
+
+    phase = 1 - phase;
+
+    return X;
+}
+
 
 #endif

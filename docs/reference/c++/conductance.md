@@ -113,7 +113,312 @@ a little more memory, but can be much faster.
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L180)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L200)
+
+-------
+
+
+
+### fast_pow
+
+**Function Signature**
+
+```C++
+inline double fast_pow(double x, int a) 
+```
+
+**Description**
+
+
+
+This method is a dirty hack to speed up computing
+exponents in C++. This requires that the power that a 
+number is raised to be an integer (0-8)
+
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L247)
+
+-------
+
+
+
+### fast_exp
+
+**Function Signature**
+
+```C++
+inline double fast_exp(double x) 
+```
+
+**Description**
+
+
+This method constitutes a dirty hack which 
+is a faster way to compute exp(x)
+but is less precise
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L285)
+
+-------
+
+
+
+### getCurrent
+
+**Function Signature**
+
+```C++
+double getCurrent(double V) 
+```
+
+**Description**
+
+
+
+The method returns the current that flows through
+this channel at this moment. 
+
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L300)
+
+-------
+
+
+
+### checkSolvers
+
+**Function Signature**
+
+```C++
+void checkSolvers(int solver_order) 
+```
+
+**Description**
+
+
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L306)
+
+-------
+
+
+
+### mdot
+
+**Function Signature**
+
+```C++
+double mdot(double V, double Ca, double m_) 
+```
+
+**Description**
+
+
+This method defines the rate of change of the `m` variable
+of this conductance. This definition is used when `integrateMS` is used. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L321)
+
+-------
+
+
+
+### hdot
+
+**Function Signature**
+
+```C++
+double hdot(double V, double Ca, double h_) 
+```
+
+**Description**
+
+
+This method defines the rate of change of the `h` variable
+of this conductance. This definition is used when `integrateMS` is used. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L329)
+
+-------
+
+
+
+### m_inf
+
+**Function Signature**
+
+```C++
+double m_inf(double V, double Ca)
+```
+
+**Description**
+
+
+This method defines the activation curve of this channel.
+This is a virtual method, and is meant to be defined in 
+the channel object. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L338)
+
+-------
+
+
+
+### h_inf
+
+**Function Signature**
+
+```C++
+double h_inf(double V, double Ca)
+```
+
+**Description**
+
+
+This method defines the inactivation curve of this channel.
+This is a virtual method, and is meant to be defined in 
+the channel object. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L345)
+
+-------
+
+
+
+### tau_m
+
+**Function Signature**
+
+```C++
+double tau_m(double V, double Ca)
+```
+
+**Description**
+
+
+This method defines the dependence of the timescale 
+of the activation variable on the voltage of this channel.
+This is a virtual method, and is meant to be defined in 
+the channel object. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L353)
+
+-------
+
+
+
+### tau_h
+
+**Function Signature**
+
+```C++
+double tau_h(double V, double Ca)
+```
+
+**Description**
+
+
+This method defines the dependence of the timescale 
+of the inactivation variable on the voltage of this channel.
+This is a virtual method, and is meant to be defined in 
+the channel object. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L361)
+
+-------
+
+
+
+### gaussrand
+
+**Function Signature**
+
+```C++
+double gaussrand() 
+```
+
+**Description**
+
+
+This method implements a very fast Gaussian random
+number generator. This is much faster than the 
+built-in generators in the C++ `<random>` header, and
+is copied from Knuth and Marsaglia.
+
+For the original source, see
+"A Convenient Method for Generating Normal Variables"
+SIAM Rev., 6(3), 260–264.
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L374)
+
+-------
+
+
+
+### connect
+
+**Function Signature**
+
+```C++
+void connect(compartment *pcomp_) 
+```
+
+**Description**
+
+
+This method "connects" a conductance object to a compartment
+object. This sets the `container` property of the conductance,
+so the channel knows which compartment contains it. 
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L407)
 
 -------
 
@@ -153,59 +458,45 @@ conductance.
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L232)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L453)
 
 -------
 
 
 
-### fast_pow
+### integrateLangevin
 
 **Function Signature**
 
 ```C++
-inline double fast_pow(double x, int a) 
+void integrateLangevin(double V, double Ca) 
 ```
 
 **Description**
 
 
+This method integrates the conductance object using
+the Euler-Maruyama method. The integration method
+used here is consistent with the methods used in
+[Goldwyn and Shea-Brown 2011](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002247)
+and with [Sengupta, Laughlin and Niven](https://journals.aps.org/pre/abstract/10.1103/PhysRevE.81.011918)
 
-This method is a dirty hack to speed up computing
-exponents in C++. This requires that the power that a 
-number is raised to be an integer (0-8)
+Briefly, this method follows the approximate Langevin
+formulation of the underlying stochastic system
+formed by N independent channels that have 
+independent gating kinetics. It can be thought of
+as the deterministic ODE, with an additive noise term
+whose variance scales with the inverse square root of
+the number of channels. The number of channels is 
+computed automatically from the channel density
+and the area of the compartment. 
 
 
 
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L283)
-
--------
-
-
-
-### fast_exp
-
-**Function Signature**
-
-```C++
-inline double fast_exp(double x) 
-```
-
-**Description**
-
-
-This method constitutes a dirty hack which 
-is a faster way to compute exp(x)
-but is less precise
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L322)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L555)
 
 -------
 
@@ -243,230 +534,7 @@ are calculated and stored. At each step, the derivative functions
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L348)
-
--------
-
-
-
-### getCurrent
-
-**Function Signature**
-
-```C++
-double getCurrent(double V) 
-```
-
-**Description**
-
-
-
-The method returns the current that flows through
-this channel at this moment. 
-
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L417)
-
--------
-
-
-
-### connect
-
-**Function Signature**
-
-```C++
-void connect(compartment *pcomp_) 
-```
-
-**Description**
-
-
-This method "connects" a conductance object to a compartment
-object. This sets the `container` property of the conductance,
-so the channel knows which compartment contains it. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L424)
-
--------
-
-
-
-### checkSolvers
-
-**Function Signature**
-
-```C++
-void checkSolvers(int solver_order) 
-```
-
-**Description**
-
-
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L431)
-
--------
-
-
-
-### mdot
-
-**Function Signature**
-
-```C++
-double mdot(double V, double Ca, double m_) 
-```
-
-**Description**
-
-
-This method defines the rate of change of the `m` variable
-of this conductance. This definition is used when `integrateMS` is used. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L446)
-
--------
-
-
-
-### hdot
-
-**Function Signature**
-
-```C++
-double hdot(double V, double Ca, double h_) 
-```
-
-**Description**
-
-
-This method defines the rate of change of the `h` variable
-of this conductance. This definition is used when `integrateMS` is used. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L454)
-
--------
-
-
-
-### m_inf
-
-**Function Signature**
-
-```C++
-double m_inf(double V, double Ca)
-```
-
-**Description**
-
-
-This method defines the activation curve of this channel.
-This is a virtual method, and is meant to be defined in 
-the channel object. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L463)
-
--------
-
-
-
-### h_inf
-
-**Function Signature**
-
-```C++
-double h_inf(double V, double Ca)
-```
-
-**Description**
-
-
-This method defines the inactivation curve of this channel.
-This is a virtual method, and is meant to be defined in 
-the channel object. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L470)
-
--------
-
-
-
-### tau_m
-
-**Function Signature**
-
-```C++
-double tau_m(double V, double Ca)
-```
-
-**Description**
-
-
-This method defines the dependence of the timescale 
-of the activation variable on the voltage of this channel.
-This is a virtual method, and is meant to be defined in 
-the channel object. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L478)
-
--------
-
-
-
-### tau_h
-
-**Function Signature**
-
-```C++
-double tau_h(double V, double Ca)
-```
-
-**Description**
-
-
-This method defines the dependence of the timescale 
-of the inactivation variable on the voltage of this channel.
-This is a virtual method, and is meant to be defined in 
-the channel object. 
-
-
-
- **Code**
-
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L486)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/conductance.hpp#L656)
 
 -------
 

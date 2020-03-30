@@ -2,9 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// inward rectifying potassium conductance
-// this version does not support temperature dependence
-// http://jn.physiology.org/content/jn/90/6/3998.full.pdf
+// component info: Inward rectifying potassium current 
+// component source [Prinz et al. 2003](http://jn.physiology.org/content/jn/90/6/3998.full.pdf)
+//
 #ifndef KD
 #define KD
 #include "conductance.hpp"
@@ -15,15 +15,15 @@ class Kd: public conductance {
 public:
 
     //specify both gbar and erev and initial conditions
-    Kd(double g_, double E_, double m_)
+    Kd(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (E)) { E = -80; }
 
         p = 4;

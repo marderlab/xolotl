@@ -3,9 +3,11 @@
     {
         "inputs":
         [
-            {"name":"conductance", "kind":"required", "type":"choices=cpplab.search('conductances')"}
+            {"name":"x","kind":"required","type":"xolotl"},
+            {"name":"obj", "kind":"required", "type":"choices=cpplab.search('conductances')"}
         ]
     },
+
 
     "xolotl.connect":
     {
@@ -13,7 +15,8 @@
         [
         	{"name":"x","kind":"required","type":"xolotl"},
             {"name":"comp1", "kind":"required", "type":"choices=x.Children"},
-            {"name":"comp2", "kind":"required", "type":"choices=x.Children"}
+            {"name":"comp2", "kind":"required", "type":"choices=x.Children"},
+            {"name":"syn","type":"choices=cpplab.search('synapses')"}
         ]
     },
 

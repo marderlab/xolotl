@@ -27,6 +27,11 @@ the activation time constant function `tau_m`, and
 the inactivation time constant function `tau_h`
 must be defined, as function handles.
 
+!!! Note "Instantaneous Kinetics"
+    If your conductance has instantaneous kinetics, you can set `tau_m` to `@(V, Ca) 0`.
+    Xolotl will automatically use a different integration scheme
+    that updates `m` to its instantaneous steady-state value.
+
 For example,
 
 ```matlab
@@ -92,17 +97,17 @@ class NewCond: public conductance {
 public:
 
     // specify parameters + initial conditions
-    NewCond(double g_, double E_, double m_, double h_)
+    NewCond(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
-        if (isnan (h)) { h = 1; }
+
+
         if (isnan (E)) { E = 30; }
 
         // specify exponents of m and h
@@ -135,8 +140,8 @@ double NewCond::tau_h(double V, double Ca) {return ...;}
 
 ```
 
-!!! warning "conductance vs. conductance"
-    Note that there are two different conductance classes that have little to do with each other. One of them is an abstract C++ class that all object of type conductance must inherit from. The other is a MATLAB class that is used to generate conductances automatically. When we're talking about C++ code, we're referring to the abstract C++ class.
+!!! warning "conductance" vs. "conductance"
+    Note that there are two different classes called "conductance". One of them is an abstract C++ class that all object of type conductance must inherit from. The other is a MATLAB class that is used to generate conductances automatically. When we're talking about C++ code, we're referring to the abstract C++ class.
 
 
 #### Why aren't there any integration routines?
@@ -279,12 +284,12 @@ void NewMech::checkSolvers(int k) {
 
 ## Creating new synapses
 
-Creating new synapses is similar to the process of 
-creating new conductances. New synapses inherit 
-from the abstract `C++` class `synapse`. 
+Creating new synapses is similar to the process of
+creating new conductances. New synapses inherit
+from the abstract `C++` class `synapse`.
 
 Here is a skeleton for a new synapse class that you
-can fill out for yourself. 
+can fill out for yourself.
 
 ```C++
 // here is an example of a synapse named NewSynapse
@@ -301,7 +306,7 @@ public:
 
     // here is the constructor function
     // it accepts the maximal conductance and a single state variable
-    NewSynapse(double g_, double s_)
+    NewSynapse(double gbar_, double s_)
     {
         gmax = g_;
         s = s_;
@@ -334,7 +339,7 @@ public:
 };
 
 // this function returns the state size of the synapse
-// which should be the number of state variables 
+// which should be the number of state variables
 // from this synapse plus one (for the synaptic current)
 int NewSynapse::getFullStateSize() {
     return 2;
@@ -402,8 +407,11 @@ void NewSynapse::connect(compartment *pcomp1_, compartment *pcomp2_) {
 <a name="whereshouldIputthem"></a>
 
 All conductances (and any other network component) are
-defined by an `.hpp` header file. You can save your
-new conductance anywhere within your MATLAB path.
+defined by an `.hpp` header file. **You can save your
+new conductance anywhere within your MATLAB path.**
+
+
+## How are built-in C++ files organized?
 
 We organize our conductance files in the xolotl
 directory under `xolotl/c++/conductances/`. Within that

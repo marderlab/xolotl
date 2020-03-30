@@ -14,9 +14,9 @@ class ACurrentPD: public conductance {
 public:
 
     // specify parameters + initial conditions
-    ACurrentPD(double g_, double E_, double m_, double h_)
+    ACurrentPD(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
@@ -30,13 +30,11 @@ public:
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
-        if (isnan (h)) { h = 1; }
+        
+        
         if (isnan (E)) { E = -80; }
 
     }
-
-    void integrate(double, double);
 
     double m_inf(double, double);
     double h_inf(double, double);

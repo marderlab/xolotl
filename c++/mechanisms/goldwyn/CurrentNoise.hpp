@@ -2,9 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// Current Noise generator
-// as in Goldwyn and Shea-Brown PLoS Comp Bio
-// https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002247
+// component info: Current Noise generator
+// component source  [Goldwyn and Shea-Brown](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1002247)
+// 
 //
 
 #ifndef CURRENTNOISE
@@ -49,8 +49,13 @@ public:
     int getFullStateSize(void);
     int getFullState(double * cont_state, int idx);
     double getState(int);
+    string getClass(void);
 
 };
+
+string CurrentNoise::getClass() {
+    return "CurrentNoise";
+}
 
 
 double CurrentNoise::getState(int idx)

@@ -10,6 +10,8 @@
 *.sublime-workspace
 *a.out
 *X_*.cpp
+*A_*.cpp
+*S_*.cpp
 *.mat
 *.lyx~
 *.lyx#
@@ -20,3 +22,4 @@ last_build.kapalin
 *pref.m
 *.github_token.json
 site/
+*.xfit

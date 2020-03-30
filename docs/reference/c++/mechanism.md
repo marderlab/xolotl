@@ -27,16 +27,98 @@ void integrate()
 **Description**
 
 
-Since mechanisms can be just about anything, the abstract
-mechanism class only implements two methods. 
-This method is used to integrate the mechanism under default 
-conditions (single-step integration). 
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "integrate"
+method, which will be used instead of this.
 
 
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L87)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L90)
+
+-------
+
+
+
+### connect
+
+**Function Signature**
+
+```C++
+void connect(compartment* comp_) 
+```
+
+**Description**
+
+
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L102)
+
+-------
+
+
+
+### connect
+
+**Function Signature**
+
+```C++
+void connect(conductance* cond_) 
+```
+
+**Description**
+
+
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L113)
+
+-------
+
+
+
+### connect
+
+**Function Signature**
+
+```C++
+void connect(synapse* syn_) 
+```
+
+**Description**
+
+
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "connect"
+method, which will be used instead of this.
+
+
+
+ **Code**
+
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L124)
 
 -------
 
@@ -53,16 +135,17 @@ void integrateMS(int k, double V, double Ca)
 **Description**
 
 
-Since mechanisms can be just about anything, the abstract
-mechanism class only implements two methods. 
-This method is used to integrate the mechanism when a multi-step
-solver is requested. 
+This virtual method is a placeholder method of mechanism that does
+nothing except throw an error. If your mechanim is properly 
+written, this will not be run (and therefore the error will
+not be thrown) because your mechanism will define a "integrateMS"
+method, which will be used instead of this.
 
 
 
  **Code**
 
-[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L98)
+[Click here to view this method's code](https://github.com/sg-s/xolotl/blob/master/c%2B%2B/mechanism.hpp#L137)
 
 -------
 

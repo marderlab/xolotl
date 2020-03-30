@@ -2,13 +2,13 @@ In this tutorial, we will walk through the process of creating a model of a sing
 
 ### A high-level view of a neuron
 
-A simple description of a neuron is to imagine that it a small spherical object, so that it can be described well be a single membrane voltage, whose dynamics are governed by populations of ion channels in the cell, as illustrated in the schematic below:
+A neuron can be approximated by a sphere such that it is well-described by a single membrane voltage, the dynamics of which are governed by populations of ion channels in the cell as illustrated in the schematic below:
 
 ![](../images/neuron-sphere.png)
 
 ### Implementing this in xolotl
 
-Note that this description of a neuron imposes a natural hierarchy to the things in our model: the soma *contains* various populations of ion channels. We will create a model in xolotl that looks like this:
+Note that this description of a neuron imposes a natural hierarchy on the things in our model: the soma *contains* various populations of ion channels. We will create a model in xolotl that looks like this:
 
 ![](../images/neuron-xolotl.png)  
 
@@ -29,7 +29,7 @@ By convention, this variable will be called `x`, though you can call it whatever
 x.add('compartment','HH','A',.01);
 ```
 
-Here, we are creating a new object of type `compartment`, setting its surface area `A` to .01 mm^2, naming it `HH` (for Hodgkin-Huxley), and adding it to our xolotl object, all in one line.
+Here, we are creating a new object of type `compartment`, setting its surface area `A` to .01 $mm^2$, naming it `HH` (for Hodgkin-Huxley), and adding it to our xolotl object, all in one line.
 
 If you look at your xolotl object by typing `x` in the MATLAB prompt, you should see something like this:
 
@@ -49,14 +49,14 @@ A compartment is pretty boring by itself. Let's add some voltage-gated channels 
 To do this, we type:
 
 ```matlab
-x.HH.add('liu/NaV','gbar',1e3,'E',30);
-x.HH.add('liu/Kd','gbar',300,'E',-80);
-x.HH.add('Leak','gbar',1);
+x.HH.add('liu/NaV', 'gbar', 1e3, 'E', 30);
+x.HH.add('liu/Kd', 'gbar', 300, 'E', -80);
+x.HH.add('Leak', 'gbar', 1);
 ```
 
 What's going on here? In each line, we are specifying the thing that we want to add to `HH`, and we are specifying some parameters of the thing we're adding using name value syntax.
 
-Let's break this up by focusing on the first line. We're adding a component that is specified by the string `liu/NaV` to `HH`. This is a voltage gated Sodium conductance. We're setting its maximal conductance to 1000 uS/mm^2, and its reversal potential to 30mV and adding it to the model. The same logic works for the other two lines.
+Let's break this down by focusing on the first line. We're adding a component that is specified by the string `liu/NaV` to `HH`. This is a voltage gated sodium conductance. We're setting its maximal conductance to 1000 uS/mm^2, and its reversal potential to 30mV and adding it to the model. The same logic works for the other two lines.
 
 When we look at our model by typing `x`, we see:
 

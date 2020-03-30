@@ -16,17 +16,17 @@ public:
 
 
     //specify both gbar and erev and initial conditions
-    Cal(double g_, double E_, double m_, double h_)
+    Cal(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
          // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
-        if (isnan (h)) { h = 1; }
+        
+        
         if (isnan (E)) { E = 0; }
 
         p = 3;
@@ -39,6 +39,7 @@ public:
     }
 
     void integrate(double, double);
+    void integrateMS(int, double, double);
 
     double m_inf(double, double);
     double h_inf(double, double);
@@ -50,13 +51,13 @@ public:
 
 string Cal::getClass(){return "Cal";}
 
-void CaT::integrate(double V, double Ca) {
+void Cal::integrate(double V, double Ca) {
     E = container->E_Ca;
     conductance::integrate(V,Ca);
     container->i_Ca += getCurrent(V);
 }
 
-void CaT::integrateMS(int k, double V, double Ca) {
+void Cal::integrateMS(int k, double V, double Ca) {
     E = container->E_Ca;
     conductance::integrateMS(k, V, Ca);
     container->i_Ca += getCurrent(V);

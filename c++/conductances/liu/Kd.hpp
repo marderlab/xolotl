@@ -2,8 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// inward rectifying potassium conductance
-// http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf
+// component info: inward rectifying Potassium current
+// component source [Liu et al. 98](http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf)
+//
 #ifndef KD
 #define KD
 #include "conductance.hpp"
@@ -14,15 +15,14 @@ class Kd: public conductance {
 public:
 
     //specify both gbar and erev and initial conditions
-    Kd(double g_, double E_, double m_)
+    Kd(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
         if (isnan (E)) { E = -80; }
 
         p = 4;

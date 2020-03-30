@@ -1,6 +1,9 @@
-% tests a neuron that reproduces Fig 3 in Tim's paper
 
-x = xolotl.examples.BurstingNeuron;
+close all
+
+% tests a neuron that reproduces Fig 3 in Tim O'Leary's paper
+
+x = xolotl.examples.neurons.BurstingNeuron('prefix','liu');
 
 g0 = 1e-1+1e-1*rand(8,1);
 x.set('*gbar',g0);
@@ -45,4 +48,4 @@ ylabel('V_m (mV)')
 xlabel('Time (s)')
 drawnow
 
-prettyFig('plw',1.5,'lw',1.5)
+figlib.pretty('PlotLineWidth',1.5,'LineWidth',1.5)

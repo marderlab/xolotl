@@ -2,8 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// Slow Calcium conductance
-// http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf
+// component info: Ca-activated potassium conductance 
+// component source [Liu et al. 98](http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf)
+//
 #ifndef KCA
 #define KCA
 #include "conductance.hpp"
@@ -14,15 +15,14 @@ class KCa: public conductance {
 public:
 
     // specify parameters + initial conditions
-    KCa(double g_, double E_, double m_)
+    KCa(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
         if (isnan (E)) { E = -80; }
 
         p = 4;

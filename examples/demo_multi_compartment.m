@@ -1,7 +1,7 @@
 % makes a realistic cable with some options
 
 
-x = xolotl.examples.BurstingCable();
+x = xolotl.examples.neurons.BurstingCable();
 x.dt = .1;
 x.sim_dt = .1;
 
@@ -21,3 +21,5 @@ plot(time,V(:,end),'k')
 xlabel('Time (s)')
 ylabel('Voltage in axon (mV)')
 set(gca,'YLim',[-80 50])
+
+figlib.pretty('PlotLineWidth',1,'LineWidth',1)

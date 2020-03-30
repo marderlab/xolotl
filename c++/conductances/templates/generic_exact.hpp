@@ -17,17 +17,15 @@ class CondName: public conductance {
 public:
 
     // specify parameters + initial conditions
-    CondName(double g_, double E_, double m_, double h_)
+    CondName(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = $default_m; }
-        if (isnan (h)) { h = $default_h; }
         if (isnan (E)) { E = $default_E; }
 
         p = $p;

@@ -7,10 +7,14 @@ class NeuriteSyn: public synapse {
 
 public:
 
+    double Delta;
+    double Vth;
+    double k_;
+
     // specify parameters + initial conditions
-    NeuriteSyn(double g_, double s_)
+    NeuriteSyn(double gmax_, double s_)
     {
-        gmax = g_;
+        gmax = gmax_;
         E = -70.0;
         Delta = 1.0;
         Vth = -25.0;
@@ -24,15 +28,14 @@ public:
 
     }
 
-    void integrate(double dt);
+    void integrate(void);
 
     void connect(compartment *pcomp1_, compartment *pcomp2_);
     int getFullState(double*, int);
     int getFullStateSize(void);
 };
 
-void NeuriteSyn::integrate(double dt)
-{
+void NeuriteSyn::integrate(void) {
 
     // figure out the voltage of the pre-synaptic neuron
     double V_pre = pre_syn->V;
@@ -45,13 +48,12 @@ void NeuriteSyn::integrate(double dt)
 
     s = s_inf + (s - s_inf)*exp(-dt/tau_s);
 
-
+    g = gmax*s;
 
 }
 
 
-int NeuriteSyn::getFullState(double *syn_state, int idx)
-{
+int NeuriteSyn::getFullState(double *syn_state, int idx) {
     // give it the current synapse variable
     syn_state[idx] = s;
     idx++;
@@ -63,14 +65,12 @@ int NeuriteSyn::getFullState(double *syn_state, int idx)
 }
 
 
-int NeuriteSyn::getFullStateSize()
-{
+int NeuriteSyn::getFullStateSize() {
     return 2;
 }
 
 
-void NeuriteSyn::connect(compartment *pcomp1_, compartment *pcomp2_)
-{
+void NeuriteSyn::connect(compartment *pcomp1_, compartment *pcomp2_) {
     pre_syn = pcomp1_;
     post_syn = pcomp2_;
 

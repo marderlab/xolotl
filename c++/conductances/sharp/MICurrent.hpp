@@ -4,7 +4,7 @@
 //
 // Modulatory Input Conductance
 // https://www.ncbi.nlm.nih.gov/pubmed/8463821
-// based on dynamic clamp in Sharp et al 1993, Bucholtz et al 1993, Golowasch et al 1992
+// based on dynamic clamp in Sharp et al 1993, Buchholtz et al 1993, Golowasch et al 1992
 #ifndef MICURRENT
 #define MICURRENT
 #include "conductance.hpp"
@@ -16,9 +16,9 @@ public:
 
 
     //specify both gbar and erev and initial conditions
-    MICurrent(double g_, double E_, double m_)
+    MICurrent(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
@@ -30,15 +30,15 @@ public:
 
 
          // defaults
- if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        if (isnan(gbar)) { gbar = 0; }
+        
         if (isnan (E)) { E = -20; }
     }
 
-    void integrate(double, double);
-
-    double m_inf(double, double);
-    double tau_m(double, double);
+    double m_inf(double V, double Ca);
+    double h_inf(double V, double Ca);
+    double tau_m(double V, double Ca);
+    double tau_h(double V, double Ca);
     string getClass(void);
 
 };
@@ -48,5 +48,7 @@ string MICurrent::getClass(){return "MICurrent";}
 double MICurrent::m_inf(double V, double Ca) {return 1.0/(1.0+exp((V+55.0)/-5));}
 double MICurrent::tau_m(double V, double Ca) {return 6.0;}
 
+double MICurrent::h_inf(double V, double Ca) {return   0;}
+double MICurrent::tau_h(double V, double Ca) {return   0;}
 
 #endif

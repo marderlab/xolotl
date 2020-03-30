@@ -1,12 +1,7 @@
-// _  _ ____ _    ____ ___ _
-//  \/  |  | |    |  |  |  |
-// _/\_ |__| |___ |__|  |  |___
-//
-// EAG channels: K+ channels that are inactivated by Calcium.
+// component info: EAG channel (K+) that is inactivated by Calcium.
 // this variant is an extra sensitive version of the channel
 // that is 2 orders more sensitive
-// paper source:
-// https://www.physiology.org/doi/10.1152/jn.00820.2017
+// component source [Bronk et al. 2017](https://journals.physiology.org/doi/full/10.1152/jn.00820.2017)
 
 #ifndef EAGES
 #define EAGES
@@ -18,15 +13,15 @@ class EAGes: public conductance {
 public:
 
     // specify parameters + initial conditions
-    EAGes(double g_, double E_, double m_)
+    EAGes(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (E)) { E = -80; }
 
         p = 1;

@@ -4,7 +4,7 @@ Code equivalent to this tutorial can be found in `../xolotl/examples/demo_stg.m`
 
 ### A high-level view of the network
 
-We will make a model of the pyloric network in the [stomatogastric ganglion in crustaceans](http://www.scholarpedia.org/article/Stomatogastric_ganglion). In our model of this network, there will be three cells called AB/PD, LP and PY, and they will be interconnected using two different types of inhibitory synapses: Cholinergic and Gluatamatergic.
+We will make a model of the pyloric network in the [stomatogastric ganglion in crustaceans](http://www.scholarpedia.org/article/Stomatogastric_ganglion). In our model of this network, there will be three cells called AB/PD, LP and PY, and they will be interconnected using two different types of inhibitory synapses: Cholinergic and Glutamatergic.
 
 This is what it looks like:
 
@@ -199,4 +199,4 @@ You should see something like this:
 ![](../images/stg-trace.png)
 
 !!! Note "A shortcut through this tutorial"
-    You can reproduce the model we created here by running the `demo_stg` script. Make sure you run `xolotl.go_to_examples` first so that you're in the right folder.
+    You can reproduce the model we created here by running the `demo_pyloric_net` script. Make sure you run `xolotl.go_to_examples` first so that you're in the right folder.

@@ -16,23 +16,21 @@ public:
 
 
     //specify both gbar and erev and initial conditions
-    HCurrent(double g_, double E_, double m_)
+    HCurrent(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
          // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (E)) { E = 0; }
 
         p = 1;
         approx_m = 1;
 
     }
-
-    void integrate(double, double);
 
     double m_inf(double, double);
     double tau_m(double, double);
@@ -41,12 +39,6 @@ public:
 };
 
 string HCurrent::getClass(){return "HCurrent";}
-
-void HCurrent::integrate(double V, double Ca)
-{
-    m = m_inf(V,Ca) + (m - m_inf(V,Ca))*exp(-dt/tau_m(V,Ca));
-    g = gbar*m;
-}
 
 
 double HCurrent::m_inf(double V, double Ca) {return (1.0/(1.0+exp(((V)+70.0)/-6.0)));}

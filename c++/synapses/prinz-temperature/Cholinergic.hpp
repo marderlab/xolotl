@@ -1,4 +1,6 @@
-// Cholingeric Synapse 
+// component info: temperature-sensitive graded Cholinergic synapse 
+// component source [Prinz et al. 2004](https://www.nature.com/articles/nn1352)
+//
 #ifndef CHOLINERGIC
 #define CHOLINERGIC
 #include "synapse.hpp"
@@ -21,12 +23,12 @@ public:
 
 
     // specify parameters + initial conditions 
-    Cholinergic(double g_, double s_, double Q_tau_, double Q_g_)
+    Cholinergic(double gmax_, double s_, double Q_tau_, double Q_g_)
     {
 
         Q_tau = Q_tau_;
         Q_g = Q_g_;
-        gmax = g_;
+        gmax = gmax_;
         E = -80.0;
 
         // dynamic variables

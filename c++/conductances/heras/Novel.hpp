@@ -18,15 +18,15 @@ public:
 
 
     //specify both gbar and erev and initial conditions
-    Novel(double g_, double E_, double m_)
+    Novel(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (E)) { E = -80; }
 
         p = 1;

@@ -2,8 +2,8 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// Sodium CONDUCTANCE
-// http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf
+// component info: Fast sodium conductance 
+// component source [Liu et al. 98](http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf)
 #ifndef NAV
 #define NAV
 #include "conductance.hpp"
@@ -14,17 +14,15 @@ class NaV: public conductance {
 public:
 
     // specify parameters + initial conditions
-    NaV(double g_, double E_, double m_, double h_)
+    NaV(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
-        if (isnan (h)) { h = 1; }
         if (isnan (E)) { E = 30; }
 
         p = 3;
@@ -33,6 +31,7 @@ public:
         // allow this channel to be approximated
         approx_m = 1;
         approx_h = 1;
+
     }
 
     double m_inf(double, double);

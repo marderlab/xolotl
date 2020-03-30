@@ -2,11 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// the A current, a potassium current
-// for some reason I don't understand, I get compiler
-// errors when I name this "A" or "Ka"
-// so we'll have to live with this awkward name
-// http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf
+// component info: A Current (K+)
+// component source [Liu et al. 98](http://www.jneurosci.org/content/jneuro/18/7/2309.full.pdf)
+//
 #ifndef ACURRENT
 #define ACURRENT
 #include "conductance.hpp"
@@ -17,17 +15,15 @@ class ACurrent: public conductance {
 public:
 
     // specify parameters + initial conditions
-    ACurrent(double g_, double E_, double m_, double h_)
+    ACurrent(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
         // defaults 
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
-        if (isnan (h)) { h = 1; }
         if (isnan (E)) { E = -80; }
 
         p = 3;

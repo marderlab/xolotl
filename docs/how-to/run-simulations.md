@@ -66,6 +66,13 @@ Currents are stored in an $n \times c$ matrix where $n$ is the number of time st
 are ordered exactly the same as in the `xolotl` object, meaning by compartment and
 then alphabetically.
 
+### (5) Synaptic currents
+
+Synaptic gating variables and curents are stored in an $n \times s$ matrix
+where $n$ is the number of time steps (`x.t_end / x.dt`) and $s$ is the number of synapses.
+Currents are ordered exactly the same as in the `xolotl` object,
+meaning by compartment and then alphabetically.
+
 !!! Note "Plotting mechanisms and currents"
     The example script `demo_stg` contains code that plots currents vs. time and `demo_integral_control` contains code that plots mechanisms vs. time.
 
@@ -109,7 +116,7 @@ x.solver_order = 0; % default, uses exponential Euler
 
 ## See Also
 
-* [xolotl.integrate](https://xolotl.readthedocs.io/en/master/reference/xolotl-methods/#integrate)
-* [xolotl.approx_channels](https://xolotl.readthedocs.io/en/master/reference/xolotl-properties/#approx_channels)
-* [xolotl.closed_loop](https://xolotl.readthedocs.io/en/master/reference/xolotl-properties/#closed_loop)
-* [xolotl.output_type](https://xolotl.readthedocs.io/en/master/reference/xolotl-properties/#output_type)
+* [xolotl.integrate](https://xolotl.readthedocs.io/en/master/reference/matlab/xolotl/#integrate)
+* [xolotl.approx_channels](https://xolotl.readthedocs.io/en/master/reference/matlab/xolotl/#approx_channels)
+* [xolotl.closed_loop](https://xolotl.readthedocs.io/en/master/reference/matlab/xolotl/#closed_loop)
+* [xolotl.output_type](https://xolotl.readthedocs.io/en/master/reference/matlab/xolotl/#output_type)

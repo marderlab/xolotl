@@ -7,7 +7,7 @@
 
 close all
 
-x = xolotl.examples.BurstingNeuron('prinz',14.96);
+x = xolotl.examples.neurons.BurstingNeuron();
 
 x.t_end = 1e4;
 x.integrate;
@@ -18,14 +18,22 @@ x.sim_dt = .05;
 x.dt = .1;
 
 figure('outerposition',[300 300 1200 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
+x.approx_channels = 0;
 x.t_end = 100e3; x.sim_dt = .05; tic; V = x.integrate; t =  toc;
 x.t_end = 5e3; V = x.integrate;
-disp(['Exact speed = ' oval(100/t) 'X'])
-plot(V,'k')
+time = (1:length(V))*x.dt*1e-3;
+disp(['Exact speed = ' strlib.oval(100/t) 'X'])
+plot(time,V,'k')
 
 x.approx_channels = 1;
 x.t_end = 100e3; x.sim_dt = .05; tic; V = x.integrate; t =  toc;
 x.t_end = 5e3; V = x.integrate;
-disp(['Approximate speed = ' oval(100/t) 'X'])
-plot(V,'r')
+disp(['Approximate speed = ' strlib.oval(100/t) 'X'])
+plot(time,V,'r')
 legend({'Exact','Approximate'})
+
+set(gca,'YLim',[-80 50])
+ylabel('V_m (mV)')
+xlabel('Time (s)')
+
+figlib.pretty('PlotLineWidth',1.5,'LineWidth',1.5)

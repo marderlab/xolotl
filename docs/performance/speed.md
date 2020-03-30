@@ -143,10 +143,16 @@ tic; V2 = x.integrate; t = toc; (x.t_end*1e-3)/t
 
 ```
 
-The slow-but-accurate simulation rat at `24X` while the fast simulation ran at around `235X`, or around **ten times faster**
+The slow-but-accurate simulation ran at `22X` while the fast simulation ran at around `340X`, or around **fifteen times faster**
 
 Let's compare the outputs of the two simulations:
 
 ![](../images/speed-comparison.png)
 
 We see that the two traces are slightly different, but the overall features are the same. 
+
+
+## Run code in parallel
+
+A common task in simulations is a parameter sweep -- the same model is run for many different parameter sets. xolotl supports all features of parallelization built into MATLAB, making it easy for you to run your code in parallel. Look at [this page](https://xolotl.readthedocs.io/en/master/how-to/run-simulations-in-parallel/) for a primer on how to run your code in parallel. 
+

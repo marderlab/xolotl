@@ -1,42 +1,45 @@
-%{   
-             _       _   _ 
-  __  _____ | | ___ | |_| |
-  \ \/ / _ \| |/ _ \| __| |
-   >  < (_) | | (_) | |_| |
-  /_/\_\___/|_|\___/ \__|_|
 
-### fI
+%              _       _   _ 
+%   __  _____ | | ___ | |_| |
+%   \ \/ / _ \| |/ _ \| __| |
+%    >  < (_) | | (_) | |_| |
+%   /_/\_\___/|_|\___/ \__|_|
+%
+% ### fI
+%
+% **Syntax**
+%
+% ```matlab
+% data = x.fI()
+% data = x.fI('Name',value...)
+% ```
+%
+% **Description**
+%
+% This method computes the f-I (firing-rate vs current)
+% curve of a single compartment model. `data` is a structure containing the following fields:
+%
+% * `I` vector of injected currents
+% * `f_up` firing rates when going up the curve
+% * `f_down` firing rates when going down the curve
+% * `CV_ISI_up` coefficient of variation of inter-spike intervals when going up the curve
+% * `CV_ISI_down` coefficient of variation of inter-spike intervals when going down the curve
+%
+% The following optional parameters may be specified in name-value syntax:
+%
+% | Name | Allowed Values | Default |
+% | ----- | ----------- | ---------- |
+% | I_min | any scalar | - .1 |
+% | I_max | any scalar | 1 |
+% | n_steps | +ve integer | 10 |
+% | t_end | +ve integers | 1e4 |
+%
+% See Also:
+% xolotl.integrate
 
-**Syntax**
 
-```matlab
-data = x.fI()
-data = x.fI('Name',value...)
-```
 
-**Description**
-
-This method computes the f-I (firing-rate vs current) 
-curve of a single compartment model. `data` is a structure containing the following fields:
-
-* `I` vector of injected currents
-* `f_up` firing rates when going up the curve
-* `f_down` firing rates when going down the curve
-* `CV_ISI_up` coefficient of variation of inter-spike intervals when going up the curve 
-* `CV_ISI_down` coefficient of variation of inter-spike intervals when going down the curve 
-
-The following optional parameters may be specified in name-value syntax:
-
-| Name | Allowed Values | Default |
-| ----- | ----------- | ---------- |
-| I_min | any scalar | - .1 |
-| I_max | any scalar | 1 | 
-| n_steps | +ve integer | 10 |
-| t_end | +ve integers | 1e4 | 
-
-%}
-
-function data = fI(self, varargin)
+function varargout = fI(self, varargin)
 
 
 
@@ -46,46 +49,25 @@ options.I_max = 1;
 options.n_steps = 10;
 options.t_end = 10e3;
 
-if nargout && ~nargin 
+if nargout && ~nargin
 	varargout{1} = options;
     return
 end
 
 % validate and accept options
-if iseven(length(varargin))
-	for ii = 1:2:length(varargin)-1
-	temp = varargin{ii};
-    if ischar(temp)
-    	if ~any(find(strcmp(temp,fieldnames(options))))
-    		disp(['Unknown option: ' temp])
-    		disp('The allowed options are:')
-    		disp(fieldnames(options))
-    		error('UNKNOWN OPTION')
-    	else
-    		options.(temp) = varargin{ii+1};
-    	end
-    end
-end
-elseif isstruct(varargin{1})
-	% should be OK...
-	options = varargin{1};
-else
-	error('Inputs need to be name value pairs')
-end
-
-
+options = corelib.parseNameValueArguments(options, varargin{:});
 
 data = struct;
 
 I0 = self.I_ext;
 S = serialize(self);
 
-assert(options.I_min < options.I_max,'I_min must be less than I_max')
-assert(options.n_steps > 2, 'n_steps too small::At least two points needed')
+corelib.assert(options.I_min < options.I_max,'I_min must be less than I_max')
+corelib.assert(options.n_steps > 2, 'n_steps too small::At least two points needed')
 
-assert(length(self.find('compartment')) == 1,' You can only compute the f-I curve for single compartment models')
+corelib.assert(length(self.find('compartment')) == 1,' You can only compute the f-I curve for single compartment models')
 
-assert(isint(options.n_steps),'n_steps must be an integer')
+corelib.assert(mathlib.isint(options.n_steps),'n_steps must be an integer')
 
 
 
@@ -138,3 +120,26 @@ end
 % restore the xolotl object the its original state
 self.deserialize(S);
 self.I_ext = I0;
+
+
+if nargout == 0
+	% make a plot
+
+	figure('outerposition',[300 300 700 600],'PaperUnits','points','PaperSize',[700 600]); hold on
+
+	plot(data.I,data.f_up,'k')
+	plot(data.I,data.f_down,'r')
+
+	xlabel('Injected current (nA)')
+	ylabel('Firing rate (Hz)')
+
+	% find the rheobase
+	r = self.rheobase('I_min',options.I_min,'I_max',options.I_max);
+	plotlib.vertline(r);
+
+	figlib.pretty()
+
+else
+	varargout{1} = data;
+
+end

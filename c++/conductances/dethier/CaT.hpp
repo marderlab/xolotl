@@ -16,16 +16,16 @@ class CaT: public conductance {
 public:
 
     // specify parameters + initial conditions
-    CaT(double g_, double E_, double m_, double h_)
+    CaT(double gbar_, double E_, double m_, double h_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
         h = h_;
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (h)) { h = 0; }
         if (isnan (E)) { E = 30; }
 
@@ -39,6 +39,7 @@ public:
     }
 
     void integrate(double, double);
+    void integrateMS(int, double, double);
 
     double m_inf(double, double);
     double tau_m(double, double);

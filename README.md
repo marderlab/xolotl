@@ -1,9 +1,11 @@
 # xolotl: a fast and flexible neuronal simulator
 
-![](https://readthedocs.org/projects/sphinx-rtd-theme/badge/?version=latest)
+[![Documentation Status](https://readthedocs.org/projects/xolotl/badge/?version=master)](https://xolotl.readthedocs.io/en/master/?badge=master)
 ![](https://img.shields.io/github/last-commit/sg-s/xolotl.svg)
 
-![](https://user-images.githubusercontent.com/6005346/41205222-30b6f3d4-6cbd-11e8-983b-9125585d629a.png)
+
+![](https://user-images.githubusercontent.com/6005346/57262966-9b751100-703c-11e9-890f-3808062e60d9.gif)
+
 
 
 
@@ -78,3 +80,26 @@ Click [here](https://github.com/sg-s/xolotl/releases/download/latest/xolotl.mltb
 # How do I cite this?
 
 We've published a technology report in [Frontiers in Neuroinformatics](https://doi.org/10.3389/fninf.2018.00087).
+
+```
+@ARTICLE{10.3389/fninf.2018.00087,
+AUTHOR={Gorur-Shandilya, Srinivas and Hoyland, Alec and Marder, Eve},   
+TITLE={Xolotl: An Intuitive and Approachable Neuron and Network Simulator for Research and Teaching},      
+JOURNAL={Frontiers in Neuroinformatics},      
+VOLUME={12},      
+PAGES={87},     
+YEAR={2018},      
+URL={https://www.frontiersin.org/article/10.3389/fninf.2018.00087},       
+DOI={10.3389/fninf.2018.00087},      
+ISSN={1662-5196},   
+}
+
+```
+
+![](https://user-images.githubusercontent.com/6005346/41205222-30b6f3d4-6cbd-11e8-983b-9125585d629a.png)
+
+
+# Papers that use `xolotl`
+
+1. [Regulation of Eag by Ca2+/calmodulin controls presynaptic excitability in Drosophila](https://www.physiology.org/doi/full/10.1152/jn.00820.2017)
+2. [Homeostatic plasticity rules that compensate for cell size are susceptible to channel deletion](https://www.biorxiv.org/cgi/content/short/753608v1)

@@ -4,19 +4,19 @@ properties
 
 
 	% activation functions
-	m_inf@function_handle
-	h_inf@function_handle
-	tau_m@function_handle
-	tau_h@function_handle
+	m_inf 
+	h_inf 
+	tau_m 
+	tau_h 
 
-	is_Ca@logical = false
+	is_Ca (1,1) logical = false
 
-	default_m@double = 0
-	default_h@double = 1
-	default_E@double
+	default_m (1,1) double = 0
+	default_h (1,1) double = 1
+	default_E (1,1) double
 
-	p@double
-	q@double
+	p (1,1) double
+	q (1,1) double
 
 
 
@@ -28,7 +28,7 @@ methods
 
 	function generateCPPFile(self, name)
 
-		assert(nargin == 2,'Not enough input arguments')
+		corelib.assert(nargin == 2,'Not enough input arguments')
 
 
 		% check that the "custom" folder exists
@@ -40,7 +40,7 @@ methods
 		% check that everything is filled out 
 		props = properties(self);
 		for i = 1:length(props)
-			assert(~isempty(self.(props{i})),['All properties must be filled out. ' props{i} ' is still not defined'])
+			corelib.assert(~isempty(self.(props{i})),['All properties must be filled out. ' props{i} ' is still not defined'])
 		end
 
 		this_dir = fileparts(which(mfilename));
@@ -49,14 +49,14 @@ methods
 
 
 		if self.is_Ca  
-			lines = lineRead([this_dir 'Ca_exact.hpp']);
+			lines = filelib.read([this_dir 'Ca_exact.hpp']);
 		else
-			lines = lineRead([this_dir 'generic_exact.hpp']);
+			lines = filelib.read([this_dir 'generic_exact.hpp']);
 		end
 
 
 		for i = 1:length(props)
-			idx = lineFind(lines,['$' props{i}]);
+			idx = filelib.find(lines,['$' props{i}]);
 			if any(idx)
 
 				this_line = lines{idx};
@@ -74,7 +74,7 @@ methods
 					end
 
 					if any(strfind(f,'NaN'))
-						f = '  0';
+						f = '  1';
 					end
 
 
@@ -96,7 +96,7 @@ methods
 		end
 
 
-		lineWrite([fileparts(fileparts(this_dir)) filesep 'custom' filesep name '.hpp'],lines);
+		filelib.write([fileparts(fileparts(this_dir)) filesep 'custom' filesep name '.hpp'],lines);
 
 
 

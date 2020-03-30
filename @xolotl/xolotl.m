@@ -13,18 +13,19 @@
 % see https://github.com/sg-s/xolotl
 % for more information
 
-classdef xolotl <  cpplab & matlab.mixin.CustomDisplay
+
+classdef xolotl <  cpplab & matlab.mixin.CustomDisplay & ConstructableHandle & UpdateableHandle
 
 properties (SetAccess = protected)
-	linked_binary@char % binary to run when integrate is called
-	synapses@struct % structure containing synapses in model
-    illegal_names = {'xolotl_network','compartment','conductance','controller','synapse','network','x','self'}; % list of illegal names for compartments, synpases and other objects
+	linked_binary char % binary to run when integrate is called
+	synapses struct % structure containing synapses in model
+    illegal_names cell = {'xolotl_network','compartment','conductance','controller','synapse','network','x','self'}; % list of illegal names for compartments, synpases and other objects
 
-    snapshots % saves snapshots of models 
+    snapshots struct % saves snapshots of models 
 
 end  % end set protected props
 
-properties (Access = protected)
+properties (Access = protected, Transient = true)
 	xolotl_folder % full path to folder that contains xolotl code
 	cpp_folder % full path to folder that contains c++ code
 
@@ -33,43 +34,52 @@ end  % end protected props
 
 
 properties
-	verbosity@double = 0;
+	verbosity (1,1) double {mustBeFinite(verbosity)} = 0;
 
-    I_ext@double;
-    V_clamp@double;
+    I_ext double;
+    V_clamp double;
 
 	% output delta t
-	dt@double = 50e-3; % ms
+	dt (1,1) double {mustBeGreaterThan(dt,0)} = .1; % ms
 
 	% simulation deltat
-	sim_dt@double = 50e-3;
-	t_end@double = 5000; % ms
+	sim_dt (1,1) double {mustBeGreaterThan(sim_dt,0)} = .1;
+	t_end (1,1) double {mustBeGreaterThan(t_end,1), mustBeInteger(t_end)} = 5000; % ms
 
-	handles
-	closed_loop = true;
-	temperature@double = 11; % centigrade
-	temperature_ref@double = 11; % centigrade
+	handles 
+	closed_loop (1,1) logical = true;
+	temperature (1,1) double {mustBeGreaterThan(temperature,0), mustBeLessThan(temperature,50)} = 11; % centigrade
+	temperature_ref (1,1) double {mustBeGreaterThan(temperature_ref,0), mustBeLessThan(temperature_ref,50)} = 11; % centigrade
 
-    manipulate_plot_func@cell
+    manipulate_plot_func cell
 
-    solver_order@double = 0;
+    solver_order (1,1) double = 0;
+
+    % should we use the current to integrate voltage
+    % in single compartments? 
+    use_current (1,1) double {mustBeInteger(use_current), mustBeLessThan(use_current, 2)} = 0;
 
     % should we approximate gating functions?
     % 0 -- no approximations
     % 1 -- integer mV only (approx)
-    approx_channels@double = 0;
+    approx_channels (1,1) double {mustBeInteger(approx_channels), mustBeLessThan(approx_channels, 2)} = 1;
+
+    % should we integrate channels deterministically?
+    % 0 -- deterministic
+    % 1 -- Langevin approximation
+    stochastic_channels (1,1) double {mustBeInteger(stochastic_channels), mustBeLessThan(stochastic_channels, 2)} = 0; 
 
     % structure that stores preferences
     % edit pref.m to change these
-    pref
+    pref struct
 
 
     % what sort of output do you desire?
     % 0 -- standard, V, Ca, etc. separated into variables
     % 1 -- a structure. all outputs included
     % 2 -- structure, but only with spike times
-    output_type@double = 0
-    spike_thresh@double = 0 % mV
+    output_type (1,1) double {mustBeInteger(output_type), mustBeLessThan(output_type, 3)} = 0
+    spike_thresh (1,1) double {mustBeFinite(spike_thresh), mustBeReal(spike_thresh)} = 0 % mV
 
 
 end % end general props
@@ -101,12 +111,12 @@ methods (Access = protected)
         		if isa(self.(compartment).(C{j}).gbar,'function_handle')
         			g = strrep(func2str(self.(compartment).(C{j}).gbar),'@()','');
         		else
-        			g = oval(self.(compartment).(C{j}).gbar);
+        			g = strlib.oval(self.(compartment).(C{j}).gbar);
         		end
         		if isa(self.(compartment).(C{j}).E,'function_handle')
         			E = strrep(func2str(self.(compartment).(C{j}).E),'@()','');
         		else
-        			E = oval(self.(compartment).(C{j}).E);
+        			E = strlib.oval(self.(compartment).(C{j}).E);
         		end
         		info_str = [' (g=' g ', E=' E ')'];
 
@@ -124,10 +134,11 @@ methods (Access = protected)
 end % end protected methods
 
 methods
-	function self = xolotl()
+	function self = xolotl(varargin)
+        self = self@ConstructableHandle(varargin{:});   
 		self.rebase;
 
-        self.pref = readPref(which(mfilename));
+        self.pref = corelib.readPref(which(mfilename));
 
         % append all classnames to illegal names
         [~,hpp_files] = self.resolvePath('');
@@ -144,19 +155,15 @@ methods
 
         self.setHiddenProps({'manipulate_plot_func','I_ext','V_clamp','snapshots'});
 
-        self.snapshots = struct('name','','V',[]);
+        self.snapshots = struct('name','','V',[],'hash','');
 
-        self.manipulate_plot_func{1} = @self.plot;
+        % also configure the real names of props
+        % for the better-serialize branch of cpplab
+        if ~isfield(self,'cpp_lab_real_names_hash')
+            self.cpp_lab_real_names = {'approx_channels';'dt' ;'output_type';'sim_dt';'solver_order';'spike_thresh'   ;'stochastic_channels';'t_end';'temperature';'temperature_ref';'use_current';'verbosity'};
+        end
 	end
 
-
-    function self = set.closed_loop(self,value)
-        if isscalar(value)
-            self.closed_loop = logical(value);
-        else
-            error('xolotl::closed_loop must be a logical scalar, either "True" or "False"')
-        end
-    end % set.closed_loop
 
 
     function self = set.V_clamp(self,V_clamp)
@@ -177,9 +184,9 @@ methods
         end
 
         % make sure that it's the right size
-        assert(size(V_clamp,2) == n_comp,'Size of V_clamp is incorrect::2nd dimension size should be n_comp')
+        corelib.assert(size(V_clamp,2) == n_comp,'Size of V_clamp is incorrect::2nd dimension size should be n_comp')
         if size(V_clamp,1) ~= 1
-            assert(size(V_clamp,1) == n_steps,'Size of V_clamp is incorrect::1st dimension size should be n_steps')
+            corelib.assert(size(V_clamp,1) == n_steps,'Size of V_clamp is incorrect::1st dimension size should be n_steps')
         end
 
         d = dbstack;
@@ -221,9 +228,9 @@ methods
         end
 
         % make sure that it's the right size
-        assert(size(I_ext,2) == n_comp,['Size of I_ext is incorrect::2nd dimension size should be' mat2str(n_comp)])
+        corelib.assert(size(I_ext,2) == n_comp,['Size of I_ext is incorrect::2nd dimension size should be ' mat2str(n_comp)])
         if size(I_ext,1) ~= 1
-            assert(size(I_ext,1) == n_steps,['Size of I_ext is incorrect::1st dimension size should be ' mat2str(n_steps)])
+            corelib.assert(size(I_ext,1) == n_steps,['Size of I_ext is incorrect::1st dimension size should be ' mat2str(n_steps)])
         end
 
         d = dbstack;
@@ -253,11 +260,10 @@ methods (Static)
     cleanup;
     
     curr_index = contributingCurrents(V,I);    
-    ax = show(conductance,ax);
-    [m_inf, h_inf, tau_m, tau_h] =  getGatingFunctions(conductance);
-
-
+    [m_inf, h_inf, tau_m, tau_h] =  getGatingFunctions(conductance)
     setup();
+
+    b = loadobj(a);
 
 end % end static methods
 end % end classdef

@@ -6,11 +6,17 @@ and make sure everything works well. You will need:
 1. [MATLAB](https://www.mathworks.com/products/matlab.html) 	(`xolotl` will not work on GNU Octave)
 2. An internet connection
 
+## Installing xolotl
+
 Download [xolotl here](https://github.com/sg-s/xolotl/releases/download/latest/xolotl.mltbx) and drag the downloaded file (`xolotl.mltbx`) onto your MATLAB workspace. MATLAB should automatically open a prompt asking you if you want to install it.
+
+!!! note
+    There are other ways to install xolotl. For example, you can download via git. [Instructions here](https://xolotl.readthedocs.io/en/master/how-to/install-configure/#using-git)
+
 
 Then we need to install a C/C++ compiler, and get MATLAB to work with that. Follow these instructions based on your operating system:
 
-## Installing
+## Installing a compiler
 
 ### macOS
 
@@ -22,7 +28,8 @@ Then we need to install a C/C++ compiler, and get MATLAB to work with that. Foll
 
 1. Download and install the [MinGW compiler](https://www.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c-compiler) from the Mathworks FileExchange. You'll need to log in using a Mathworks account. This ridiculous restriction is Mathworks' fault.
 
-> You can also get the compiler as a MATLAB "add-on."
+!!! note
+    You can also get the compiler as a MATLAB "add-on."
 
 
 ### GNU/Linux
@@ -50,7 +57,10 @@ MEX configured to use 'Xcode Clang++' for C++ language compilation.
 MEX configured to use 'Xcode with Clang' for C language compilation.
 ```
 
-## Verify your installation
+!!! note
+    Setting up a compiler for MATLAB can be tricky. See our more detailed advice [here](https://xolotl.readthedocs.io/en/master/how-to/install-configure/#compilers-on-gnulinux).
+
+### Verify your installation
 
 OK, let's make sure everything works. Copy and paste the following code into your MATLAB terminal:
 

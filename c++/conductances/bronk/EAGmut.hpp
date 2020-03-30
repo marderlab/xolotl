@@ -2,10 +2,9 @@
 //  \/  |  | |    |  |  |  |
 // _/\_ |__| |___ |__|  |  |___
 //
-// EAG channels: K+ channels that are inactivated by Calcium.
+// component info: mutant EAG channels that are inactivated by Calcium.
 // mutant, less sensitive to Ca
-// paper source:
-// https://www.physiology.org/doi/10.1152/jn.00820.2017
+// component source [Bronk et al. 2017](https://www.physiology.org/doi/10.1152/jn.00820.2017)
 
 #ifndef EAGMUT
 #define EAGMUT
@@ -17,15 +16,15 @@ class EAGmut: public conductance {
 public:
 
     // specify parameters + initial conditions
-    EAGmut(double g_, double E_, double m_)
+    EAGmut(double gbar_, double E_, double m_)
     {
-        gbar = g_;
+        gbar = gbar_;
         E = E_;
         m = m_;
 
         // defaults
         if (isnan(gbar)) { gbar = 0; }
-        if (isnan (m)) { m = 0; }
+        
         if (isnan (E)) { E = -80; }
 
         p = 1;
